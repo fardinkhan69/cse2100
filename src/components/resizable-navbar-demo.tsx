@@ -33,15 +33,15 @@ export default function NavbarDemo() {
     }
   };
 
-  // Handle book appointment button click with authentication check
-  const handleBookAppointmentClick = () => {
-    if (user) {
-      // User is authenticated, scroll to doctors section
-      handleAnchorClick("#doctors");
-    } else {
-      // User is not authenticated, redirect to login
-      window.location.href = "/login";
+  // Get user display name from Firebase user object
+  const getUserDisplayName = () => {
+    if (user?.displayName) {
+      return user.displayName;
+    } else if (user?.email) {
+      // Extract name from email (before @)
+      return user.email.split('@')[0];
     }
+    return 'User';
   };
 
   return (
@@ -101,14 +101,31 @@ export default function NavbarDemo() {
             </NavLink>
           </div>
 
-          {/* Book Appointment Button */}
-          <div className="flex items-center gap-4">
-            <button
-              onClick={handleBookAppointmentClick}
-              className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-medical-medium text-white hover:bg-medical-dark h-10 px-4 py-2"
-            >
-              Book Appointment
-            </button>
+          {/* Dynamic User/Login Button */}
+          <div className="flex items-center gap-4 relative z-[70] pointer-events-auto">
+            {user ? (
+              // User is logged in - show user name linking to dashboard
+              <NavLink
+                to="/dashboard"
+                className="relative z-[70] inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 bg-medical-medium text-white hover:bg-medical-dark h-10 px-4 py-2 cursor-pointer pointer-events-auto"
+                onClick={() => {
+                  console.log('User button clicked!');
+                }}
+              >
+                {getUserDisplayName()}
+              </NavLink>
+            ) : (
+              // User is not logged in - show login button
+              <NavLink
+                to="/login"
+                className="relative z-[70] inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 bg-medical-medium text-white hover:bg-medical-dark h-10 px-4 py-2 cursor-pointer pointer-events-auto"
+                onClick={() => {
+                  console.log('Login button clicked!');
+                }}
+              >
+                Login
+              </NavLink>
+            )}
           </div>
         </NavBody>
 
@@ -175,15 +192,31 @@ export default function NavbarDemo() {
             </NavLink>
 
             <div className="flex w-full flex-col gap-4 mt-4">
-              <button
-                onClick={() => {
-                  handleBookAppointmentClick();
-                  setIsMobileMenuOpen(false);
-                }}
-                className="w-full inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-medical-medium text-white hover:bg-medical-dark h-10 px-4 py-2"
-              >
-                Book Appointment
-              </button>
+              {user ? (
+                // User is logged in - show user name linking to dashboard
+                <NavLink
+                  to="/dashboard"
+                  onClick={() => {
+                    console.log('Mobile user button clicked!');
+                    setIsMobileMenuOpen(false);
+                  }}
+                  className="w-full inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 bg-medical-medium text-white hover:bg-medical-dark h-10 px-4 py-2 cursor-pointer pointer-events-auto"
+                >
+                  {getUserDisplayName()}
+                </NavLink>
+              ) : (
+                // User is not logged in - show login button
+                <NavLink
+                  to="/login"
+                  onClick={() => {
+                    console.log('Mobile login button clicked!');
+                    setIsMobileMenuOpen(false);
+                  }}
+                  className="w-full inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 bg-medical-medium text-white hover:bg-medical-dark h-10 px-4 py-2 cursor-pointer pointer-events-auto"
+                >
+                  Login
+                </NavLink>
+              )}
             </div>
           </MobileNavMenu>
         </MobileNav>
