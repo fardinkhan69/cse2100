@@ -116,7 +116,7 @@ const BookAppointment = () => {
           <Card className="bg-white shadow-xl border-0 rounded-xl h-fit sticky top-8">
             
             {/* Doctor card header */}
-            <CardHeader className="bg-gradient-to-r from-medical-light to-medical-medium text-white rounded-t-xl pb-6">
+            <CardHeader className="bg-gradient-to-r from-medical-medium to-medical-dark text-white rounded-t-xl pb-6">
               <div className="flex items-center gap-4">
                 {/* Doctor avatar */}
                 <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center flex-shrink-0">
@@ -170,7 +170,7 @@ const BookAppointment = () => {
                     <Badge 
                       key={index}
                       variant="outline" 
-                      className="justify-center py-2 bg-cream border-medical-medium text-medical-dark hover:bg-medical-light hover:text-white transition-colors"
+                      className="justify-center py-2 bg-medical-light/10 border-medical-medium text-medical-dark hover:bg-medical-medium hover:text-white transition-colors font-medium"
                     >
                       {slot}
                     </Badge>

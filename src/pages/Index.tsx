@@ -25,6 +25,9 @@ import ImpactSection from "@/components/ImpactSection";
 import ServicesSection from "@/components/ServicesSection";
 import TestimonialsSection from "@/components/TestimonialsSection";
 import FooterCTA from "@/components/FooterCTA";
+import AboutSection from "@/components/AboutSection";
+import FacilitiesSection from "@/components/FacilitiesSection";
+import ContactSection from "@/components/ContactSection";
 
 /**
  * Index Component - Main Home Page
@@ -57,6 +60,9 @@ const Index = () => {
 
       {/* Impact Section */}
       <ImpactSection />
+
+      {/* About Section */}
+      <AboutSection />
 
       {/* Doctors Section */}
       <section id="doctors" className="py-24 px-4 bg-gradient-to-br from-cream to-white">
@@ -101,8 +107,14 @@ const Index = () => {
       {/* Services Section */}
       <ServicesSection />
 
+      {/* Facilities Section */}
+      <FacilitiesSection />
+
       {/* Testimonials Section */}
       <TestimonialsSection />
+
+      {/* Contact Section */}
+      <ContactSection />
 
       {/* Footer CTA Section */}
       <FooterCTA />
