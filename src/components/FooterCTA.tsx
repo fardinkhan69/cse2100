@@ -25,14 +25,14 @@ const FooterCTA = () => {
           >
             <Button 
               size="lg" 
-              className="bg-white text-medical-dark hover:bg-gray-100 px-12 py-6 text-xl font-bold rounded-2xl shadow-2xl hover:shadow-3xl transition-all duration-300"
+              className="bg-white text-medical-dark hover:bg-gray-100 px-6 py-4 sm:px-8 sm:py-5 md:px-12 md:py-6 text-base sm:text-lg md:text-xl font-bold rounded-xl md:rounded-2xl shadow-2xl hover:shadow-3xl transition-all duration-300 w-full sm:w-auto"
               onClick={() => {
                 const doctorsSection = document.getElementById('doctors');
                 doctorsSection?.scrollIntoView({ behavior: 'smooth' });
               }}
             >
-              <Calendar className="mr-3 h-6 w-6" />
-              Book Your Appointment Now
+              <Calendar className="mr-2 sm:mr-3 h-5 w-5 sm:h-6 sm:w-6 flex-shrink-0" />
+              <span className="whitespace-nowrap sm:whitespace-normal">Book Your Appointment Now</span>
             </Button>
           </motion.div>
         </motion.div>
