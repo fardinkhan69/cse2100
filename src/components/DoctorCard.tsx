@@ -11,6 +11,7 @@
  * - Shows available time slots
  * - Interactive "Book Appointment" button
  * - Hover effects for better user experience
+ * - Consistent card heights regardless of content
  */
 
 import React from 'react';
@@ -44,8 +45,8 @@ const DoctorCard: React.FC<DoctorCardProps> = ({ doctor, onBookAppointment }) =>
   };
 
   return (
-    // Main card container with custom styling and hover effects
-    <Card className="w-full max-w-sm mx-auto bg-white shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 border-0 rounded-2xl overflow-hidden group">
+    // Main card container with fixed height and consistent styling
+    <Card className="w-full max-w-sm mx-auto h-[480px] bg-white shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 border-0 rounded-2xl overflow-hidden group flex flex-col">
       
       {/* Card Header - Doctor's basic information */}
       <CardHeader className="bg-gradient-to-r from-medical-medium to-medical-dark text-white pb-6 group-hover:from-medical-dark group-hover:to-medical-medium transition-all duration-300">
@@ -73,7 +74,7 @@ const DoctorCard: React.FC<DoctorCardProps> = ({ doctor, onBookAppointment }) =>
       </CardHeader>
 
       {/* Card Content - Experience, rating, and available slots */}
-      <CardContent className="p-6 space-y-5">
+      <CardContent className="p-6 space-y-5 flex-1 flex flex-col">
         
         {/* Experience and Rating section */}
         <div className="flex justify-between items-center">
@@ -88,10 +89,12 @@ const DoctorCard: React.FC<DoctorCardProps> = ({ doctor, onBookAppointment }) =>
           </div>
         </div>
 
-        {/* Doctor bio/description */}
-        <p className="text-gray-600 text-sm leading-relaxed line-clamp-3">
-          {doctor.bio}
-        </p>
+        {/* Doctor bio/description with fixed height */}
+        <div className="flex-1">
+          <p className="text-gray-600 text-sm leading-relaxed line-clamp-3">
+            {doctor.bio}
+          </p>
+        </div>
 
         {/* Available time slots */}
         <div>

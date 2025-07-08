@@ -2,45 +2,105 @@
 /**
  * Login Page Component
  * 
- * Modern login page design ready for Firebase authentication integration
+ * Modern login page design with Firebase authentication integration
  * Features:
  * - Responsive design for all screen sizes
- * - Email/password authentication fields
+ * - Email/password authentication with Firebase
+ * - Google Sign-In integration
+ * - Create new account functionality
  * - Modern UI with animations
- * - Ready for Firebase integration
- * - Forgot password functionality
- * - Sign up redirect option
+ * - Improved gradient and text visibility
  */
 
 import React, { useState } from 'react';
-import { motion } from 'motion/react';
+import { motion, AnimatePresence } from 'motion/react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Eye, EyeOff, Mail, Lock, ArrowLeft } from 'lucide-react';
+import { Eye, EyeOff, Mail, Lock, ArrowLeft, Chrome } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { signInWithEmailAndPassword, createUserWithEmailAndPassword, signInWithPopup } from 'firebase/auth';
+import { auth, googleProvider } from '@/firebase/firebase.init';
+import { useToast } from '@/hooks/use-toast';
 
 const Login = () => {
   const navigate = useNavigate();
+  const { toast } = useToast();
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isCreateAccount, setIsCreateAccount] = useState(false);
 
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleEmailLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     
-    // TODO: Integrate with Firebase Authentication
-    console.log('Login attempt:', { email, password });
-    
-    // Simulate API call
-    setTimeout(() => {
-      setIsLoading(false);
-      // On successful login, redirect to dashboard
+    try {
+      if (isCreateAccount) {
+        if (password !== confirmPassword) {
+          toast({
+            title: "Error",
+            description: "Passwords do not match",
+            variant: "destructive",
+          });
+          setIsLoading(false);
+          return;
+        }
+        
+        await createUserWithEmailAndPassword(auth, email, password);
+        toast({
+          title: "Success",
+          description: "Account created successfully!",
+        });
+      } else {
+        await signInWithEmailAndPassword(auth, email, password);
+        toast({
+          title: "Success",
+          description: "Logged in successfully!",
+        });
+      }
+      
       navigate('/dashboard');
-    }, 2000);
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleGoogleLogin = async () => {
+    setIsLoading(true);
+    
+    try {
+      await signInWithPopup(auth, googleProvider);
+      toast({
+        title: "Success",
+        description: "Logged in with Google successfully!",
+      });
+      navigate('/dashboard');
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const toggleCreateAccount = () => {
+    setIsCreateAccount(!isCreateAccount);
+    setEmail('');
+    setPassword('');
+    setConfirmPassword('');
   };
 
   return (
@@ -96,7 +156,7 @@ const Login = () => {
         className="w-full max-w-md relative z-10"
       >
         <Card className="backdrop-blur-sm bg-white/80 shadow-2xl border-0 rounded-2xl overflow-hidden">
-          <CardHeader className="text-center space-y-2 bg-gradient-to-r from-medical-light to-medical-medium text-white p-8">
+          <CardHeader className="text-center space-y-2 bg-gradient-to-r from-medical-dark via-medical-medium to-medical-dark text-white p-8">
             <motion.div
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
@@ -105,111 +165,158 @@ const Login = () => {
             >
               <span className="text-white font-bold text-2xl">R</span>
             </motion.div>
-            <CardTitle className="text-2xl font-bold text-white">Welcome Back</CardTitle>
-            <CardDescription className="text-white/80">
-              Sign in to your RUET Medical Center account
+            <CardTitle className="text-2xl font-bold text-white">
+              {isCreateAccount ? 'Create Account' : 'Welcome Back'}
+            </CardTitle>
+            <CardDescription className="text-white/90 font-medium">
+              {isCreateAccount 
+                ? 'Join RUET Medical Center today' 
+                : 'Sign in to your RUET Medical Center account'
+              }
             </CardDescription>
           </CardHeader>
 
           <CardContent className="p-8">
-            <form onSubmit={handleLogin} className="space-y-6">
-              
-              {/* Email Field */}
-              <div className="space-y-2">
-                <Label htmlFor="email" className="text-gray-700 font-medium">Email Address</Label>
-                <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-                  <Input
-                    id="email"
-                    type="email"
-                    placeholder="Enter your student email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="pl-10 h-12 bg-gray-50 border-gray-200 focus:border-medical-medium focus:ring-medical-light rounded-lg"
-                    required
-                  />
-                </div>
-              </div>
-
-              {/* Password Field */}
-              <div className="space-y-2">
-                <Label htmlFor="password" className="text-gray-700 font-medium">Password</Label>
-                <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-                  <Input
-                    id="password"
-                    type={showPassword ? 'text' : 'password'}
-                    placeholder="Enter your password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="pl-10 pr-12 h-12 bg-gray-50 border-gray-200 focus:border-medical-medium focus:ring-medical-light rounded-lg"
-                    required
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                  >
-                    {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                  </button>
-                </div>
-              </div>
-
-              {/* Forgot Password Link */}
-              <div className="text-right">
-                <button
-                  type="button"
-                  className="text-sm text-medical-dark hover:text-medical-medium font-medium"
-                >
-                  Forgot your password?
-                </button>
-              </div>
-
-              {/* Login Button */}
-              <motion.div
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
+            <AnimatePresence mode="wait">
+              <motion.form
+                key={isCreateAccount ? 'create' : 'login'}
+                initial={{ opacity: 0, x: isCreateAccount ? 20 : -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: isCreateAccount ? -20 : 20 }}
+                transition={{ duration: 0.3 }}
+                onSubmit={handleEmailLogin}
+                className="space-y-6"
               >
+                
+                {/* Email Field */}
+                <div className="space-y-2">
+                  <Label htmlFor="email" className="text-gray-700 font-medium">Email Address</Label>
+                  <div className="relative">
+                    <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                    <Input
+                      id="email"
+                      type="email"
+                      placeholder="Enter your student email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      className="pl-10 h-12 bg-gray-50 border-gray-200 focus:border-medical-medium focus:ring-medical-light rounded-lg"
+                      required
+                    />
+                  </div>
+                </div>
+
+                {/* Password Field */}
+                <div className="space-y-2">
+                  <Label htmlFor="password" className="text-gray-700 font-medium">Password</Label>
+                  <div className="relative">
+                    <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                    <Input
+                      id="password"
+                      type={showPassword ? 'text' : 'password'}
+                      placeholder="Enter your password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      className="pl-10 pr-12 h-12 bg-gray-50 border-gray-200 focus:border-medical-medium focus:ring-medical-light rounded-lg"
+                      required
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                    >
+                      {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                    </button>
+                  </div>
+                </div>
+
+                {/* Confirm Password Field (only for create account) */}
+                {isCreateAccount && (
+                  <div className="space-y-2">
+                    <Label htmlFor="confirmPassword" className="text-gray-700 font-medium">Confirm Password</Label>
+                    <div className="relative">
+                      <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                      <Input
+                        id="confirmPassword"
+                        type={showPassword ? 'text' : 'password'}
+                        placeholder="Confirm your password"
+                        value={confirmPassword}
+                        onChange={(e) => setConfirmPassword(e.target.value)}
+                        className="pl-10 pr-12 h-12 bg-gray-50 border-gray-200 focus:border-medical-medium focus:ring-medical-light rounded-lg"
+                        required
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {/* Forgot Password Link (only for login) */}
+                {!isCreateAccount && (
+                  <div className="text-right">
+                    <button
+                      type="button"
+                      className="text-sm text-medical-dark hover:text-medical-medium font-medium"
+                    >
+                      Forgot your password?
+                    </button>
+                  </div>
+                )}
+
+                {/* Submit Button */}
+                <motion.div
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  <Button
+                    type="submit"
+                    className="w-full h-12 bg-gradient-to-r from-medical-medium to-medical-dark hover:from-medical-dark hover:to-medical-medium text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all duration-300"
+                    disabled={isLoading}
+                  >
+                    {isLoading ? (
+                      <motion.div
+                        animate={{ rotate: 360 }}
+                        transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                        className="w-5 h-5 border-2 border-white border-t-transparent rounded-full"
+                      />
+                    ) : (
+                      isCreateAccount ? 'Create Account' : 'Sign In'
+                    )}
+                  </Button>
+                </motion.div>
+
+                {/* Google Login Button */}
                 <Button
-                  type="submit"
-                  className="w-full h-12 bg-gradient-to-r from-medical-medium to-medical-dark hover:from-medical-dark hover:to-medical-medium text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all duration-300"
+                  type="button"
+                  onClick={handleGoogleLogin}
+                  variant="outline"
+                  className="w-full h-12 border-2 border-gray-200 text-gray-700 hover:bg-gray-50 font-semibold rounded-lg transition-all duration-300 flex items-center gap-3"
                   disabled={isLoading}
                 >
-                  {isLoading ? (
-                    <motion.div
-                      animate={{ rotate: 360 }}
-                      transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                      className="w-5 h-5 border-2 border-white border-t-transparent rounded-full"
-                    />
-                  ) : (
-                    'Sign In'
-                  )}
+                  <Chrome className="w-5 h-5" />
+                  Continue with Google
                 </Button>
-              </motion.div>
 
-              {/* Divider */}
-              <div className="relative my-6">
-                <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-gray-200"></div>
+                {/* Divider */}
+                <div className="relative my-6">
+                  <div className="absolute inset-0 flex items-center">
+                    <div className="w-full border-t border-gray-200"></div>
+                  </div>
+                  <div className="relative flex justify-center text-sm">
+                    <span className="px-4 bg-white text-gray-500">
+                      {isCreateAccount ? 'Already have an account?' : 'New to RUET Medical?'}
+                    </span>
+                  </div>
                 </div>
-                <div className="relative flex justify-center text-sm">
-                  <span className="px-4 bg-white text-gray-500">New to RUET Medical?</span>
-                </div>
-              </div>
 
-              {/* Sign Up Button */}
-              <Button
-                type="button"
-                variant="outline"
-                className="w-full h-12 border-2 border-medical-medium text-medical-dark hover:bg-medical-light hover:text-white font-semibold rounded-lg transition-all duration-300"
-                onClick={() => {
-                  // TODO: Navigate to sign up page or implement sign up modal
-                  console.log('Navigate to sign up');
-                }}
-              >
-                Create New Account
-              </Button>
-            </form>
+                {/* Toggle Create Account Button */}
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="w-full h-12 border-2 border-medical-medium text-medical-dark hover:bg-medical-medium hover:text-white font-semibold rounded-lg transition-all duration-300"
+                  onClick={toggleCreateAccount}
+                >
+                  {isCreateAccount ? 'Sign In Instead' : 'Create New Account'}
+                </Button>
+              </motion.form>
+            </AnimatePresence>
           </CardContent>
         </Card>
       </motion.div>
