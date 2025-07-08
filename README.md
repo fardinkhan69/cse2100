@@ -1,73 +1,77 @@
-# Welcome to your Lovable project
 
-## Project info
+# Doctor Appointment Booking System
 
-**URL**: https://lovable.dev/projects/fde13378-7a01-4442-97c6-ced8d3aaff81
+This is a web application for students to book appointments with doctors at RUET Medical Center. The system allows students to view available doctors, book appointments, and manage their bookings through a secure dashboard.
 
-## How can I edit this code?
+## Features
 
-There are several ways of editing your application.
+- **Doctor Listings:** Browse all available doctors and their specialties.
+- **Student Login:** Secure authentication for students.
+- **Book Appointment:** Book an appointment with a specific doctor.
+- **Dashboard:** View and manage your appointments (protected route).
+- **Responsive UI:** Modern, mobile-friendly design using shadcn-ui and Tailwind CSS.
+- **Notifications:** Toast notifications for user feedback.
+- **404 Page:** Custom not found page for invalid routes.
 
-**Use Lovable**
+## Technologies Used
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/fde13378-7a01-4442-97c6-ced8d3aaff81) and start prompting.
-
-Changes made via Lovable will be committed automatically to this repo.
-
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
-```
-
-**Edit a file directly in GitHub**
-
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
-
-**Use GitHub Codespaces**
-
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
-
-## What technologies are used for this project?
-
-This project is built with:
-
-- Vite
-- TypeScript
 - React
+- TypeScript
+- Vite
+- React Router
 - shadcn-ui
 - Tailwind CSS
+- React Query
 
-## How can I deploy this project?
+## Getting Started
 
-Simply open [Lovable](https://lovable.dev/projects/fde13378-7a01-4442-97c6-ced8d3aaff81) and click on Share -> Publish.
+### Prerequisites
 
-## Can I connect a custom domain to my Lovable project?
+- Node.js (v16 or higher recommended)
+- npm or bun
 
-Yes, you can!
+### Installation
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+1. Clone the repository:
+   ```sh
+   git clone <YOUR_GIT_URL>
+   cd ruet_medical_client
+   ```
+2. Install dependencies:
+   ```sh
+   npm install
+   # or
+   bun install
+   ```
+3. Start the development server:
+   ```sh
+   npm run dev
+   # or
+   bun run dev
+   ```
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+The app will be available at `http://localhost:5173` by default.
+
+## Project Structure
+
+- `src/pages/` — Main pages (Home, Login, Dashboard, BookAppointment, NotFound)
+- `src/components/` — Reusable UI and logic components
+- `src/components/ui/` — UI primitives (button, card, dialog, etc.)
+- `src/data/` — Static data (e.g., doctors list)
+- `src/firebase/` — Firebase initialization
+- `src/hooks/` — Custom React hooks
+- `src/lib/` — Utility functions
+
+## Deployment
+
+You can deploy this app to any static hosting provider (Vercel, Netlify, etc.) after building:
+
+```sh
+npm run build
+# or
+bun run build
+```
+
+## License
+
+This project is for educational purposes at RUET. Feel free to use and modify for your own needs.
