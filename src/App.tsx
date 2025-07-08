@@ -28,6 +28,8 @@ import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import BookAppointment from "./pages/BookAppointment";
 import NotFound from "./pages/NotFound";
+import AuthProvider from "./components/AuthProvider";
+import PrivateRoute from "./components/PrivateRoute";
 
 // Create a new QueryClient instance for React Query
 // This handles caching, background updates, and error retries
@@ -58,22 +60,33 @@ const App = () => (
       
       {/* BrowserRouter: Enables client-side routing */}
       <BrowserRouter>
-        <Routes>
-          {/* Home page route - displays all doctors */}
-          <Route path="/" element={<Index />} />
-          
-          {/* Login page route - student authentication */}
-          <Route path="/login" element={<Login />} />
-          
-          {/* Dashboard route - student appointment management */}
-          <Route path="/dashboard" element={<Dashboard />} />
-          
-          {/* Individual doctor booking page - uses dynamic parameter */}
-          <Route path="/book/:doctorId" element={<BookAppointment />} />
-          
-          {/* Catch-all route for 404 errors - MUST be last */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
+        {/* AuthProvider: Provides authentication context to all routes */}
+        <AuthProvider>
+          <Routes>
+            {/* Home page route - displays all doctors */}
+            <Route path="/" element={<Index />} />
+
+            {/* Login page route - student authentication */}
+            <Route path="/login" element={<Login />} />
+
+            {/* Protected Dashboard route - student appointment management */}
+            <Route path="/dashboard" element={
+              <PrivateRoute>
+                <Dashboard />
+              </PrivateRoute>
+            } />
+
+            {/* Protected Individual doctor booking page - uses dynamic parameter */}
+            <Route path="/book/:doctorId" element={
+              <PrivateRoute>
+                <BookAppointment />
+              </PrivateRoute>
+            } />
+
+            {/* Catch-all route for 404 errors - MUST be last */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>

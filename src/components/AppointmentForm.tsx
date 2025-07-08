@@ -183,7 +183,7 @@ const AppointmentForm: React.FC<AppointmentFormProps> = ({ doctor }) => {
   return (
     <Card className="w-full max-w-md mx-auto bg-white shadow-xl border-0 rounded-xl">
       {/* Form Header */}
-      <CardHeader className="bg-gradient-to-r from-medical-light to-medical-medium text-white rounded-t-xl pb-6">
+      <CardHeader className="bg-gradient-to-r from-medical-medium to-medical-dark text-white rounded-t-xl pb-6">
         <div className="flex items-center gap-3">
           <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
             <User className="w-6 h-6 text-white" />

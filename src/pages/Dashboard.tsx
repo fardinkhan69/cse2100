@@ -11,7 +11,7 @@
  * - Modern card-based design with animations
  */
 
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { motion } from 'motion/react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -33,6 +33,8 @@ import {
   FileText
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { AuthContext } from '@/components/AuthProvider';
+import { useToast } from '@/hooks/use-toast';
 
 // Mock data for appointments and user info
 const upcomingAppointments = [
@@ -83,6 +85,8 @@ const previousAppointments = [
 
 const Dashboard = () => {
   const navigate = useNavigate();
+  const { signOutUser } = useContext(AuthContext);
+  const { toast } = useToast();
   const [activeTab, setActiveTab] = useState('upcoming');
   const [userInfo, setUserInfo] = useState({
     name: 'Ahmed Hassan',
@@ -105,8 +109,21 @@ const Dashboard = () => {
     // TODO: Show confirmation dialog and cancel appointment
   };
 
-  const handleLogout = () => {
-    navigate('/');
+  const handleLogout = async () => {
+    try {
+      await signOutUser();
+      toast({
+        title: "Success",
+        description: "Logged out successfully!",
+      });
+      navigate('/');
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
   };
 
   return (
@@ -119,7 +136,7 @@ const Dashboard = () => {
         className="bg-white shadow-sm border-b border-gray-200 px-6 py-4"
       >
         <div className="flex justify-between items-center max-w-7xl mx-auto">
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-4" onClick={() => navigate('/')} style={{cursor:'pointer'}}>
             <div className="h-10 w-10 rounded-full bg-medical-medium flex items-center justify-center">
               <span className="text-white font-bold text-lg">R</span>
             </div>

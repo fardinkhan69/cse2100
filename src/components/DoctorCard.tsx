@@ -14,13 +14,14 @@
  * - Consistent card heights regardless of content
  */
 
-import React from 'react';
+import React, { useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Clock, Star, User } from 'lucide-react';
 import { Doctor } from '@/data/doctors';
+import { AuthContext } from './AuthProvider';
 
 // Props interface for type safety and better development experience
 interface DoctorCardProps {
@@ -31,16 +32,25 @@ interface DoctorCardProps {
 const DoctorCard: React.FC<DoctorCardProps> = ({ doctor, onBookAppointment }) => {
   // React Router hook for programmatic navigation
   const navigate = useNavigate();
+  const { user } = useContext(AuthContext);
 
   /**
    * Handle booking button click
-   * Navigates to the booking page for the specific doctor
+   * Checks authentication and redirects appropriately
    */
   const handleBookAppointment = () => {
     if (onBookAppointment) {
       onBookAppointment();
     } else {
-      navigate(`/book/${doctor.id}`);
+      const bookingUrl = `/book/${doctor.id}`;
+
+      if (user) {
+        // User is authenticated, go directly to booking page
+        navigate(bookingUrl);
+      } else {
+        // User is not authenticated, redirect to login with intended destination
+        navigate(`/login?redirect=${encodeURIComponent(bookingUrl)}`);
+      }
     }
   };
 

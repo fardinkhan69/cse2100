@@ -12,34 +12,73 @@
  * - Improved gradient and text visibility
  */
 
-import React, { useState } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Eye, EyeOff, Mail, Lock, ArrowLeft, Chrome } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
-import { signInWithEmailAndPassword, createUserWithEmailAndPassword, signInWithPopup } from 'firebase/auth';
-import { auth, googleProvider } from '@/firebase/firebase.init';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
+import { AuthContext } from '@/components/AuthProvider';
 
 const Login = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const { user, setUser, createUser, signInUser, signInWithGoogle, isLoading, setIsLoading } = useContext(AuthContext);
   const { toast } = useToast();
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
   const [isCreateAccount, setIsCreateAccount] = useState(false);
+
+  // Get the intended destination from location state or URL params with validation
+  const getValidatedRedirectUrl = () => {
+    const fromState = location.state?.from?.pathname;
+    const fromQuery = new URLSearchParams(location.search).get('redirect');
+    const redirectUrl = fromState || fromQuery;
+
+    // Validate redirect URL to prevent open redirect attacks
+    if (redirectUrl) {
+      // Only allow internal URLs (starting with /)
+      if (redirectUrl.startsWith('/') && !redirectUrl.startsWith('//')) {
+        // Additional validation for known routes
+        const validRoutes = ['/dashboard', '/book/', '/'];
+        const isValidRoute = validRoutes.some(route =>
+          redirectUrl === route || redirectUrl.startsWith(route)
+        );
+
+        if (isValidRoute) {
+          console.log('Smart redirect: Redirecting to intended destination:', redirectUrl);
+          return redirectUrl;
+        }
+      }
+    }
+
+    // Default to dashboard if no valid redirect URL
+    console.log('Smart redirect: No valid redirect URL found, defaulting to dashboard');
+    return '/dashboard';
+  };
+
+  const from = getValidatedRedirectUrl();
+
+  // Redirect authenticated users to their intended destination
+  useEffect(() => {
+    if (user && !isLoading) {
+      navigate(from, { replace: true });
+    }
+  }, [user, isLoading, navigate, from]);
 
   const handleEmailLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    
+
     try {
       if (isCreateAccount) {
+        // Validate password confirmation
         if (password !== confirmPassword) {
           toast({
             title: "Error",
@@ -49,21 +88,27 @@ const Login = () => {
           setIsLoading(false);
           return;
         }
-        
-        await createUserWithEmailAndPassword(auth, email, password);
+
+        // Create new account
+        const userCredential = await createUser(email, password);
+        setUser(userCredential.user);
         toast({
           title: "Success",
           description: "Account created successfully!",
         });
       } else {
-        await signInWithEmailAndPassword(auth, email, password);
+        // Sign in existing user
+        const userCredential = await signInUser(email, password);
+        setUser(userCredential.user);
         toast({
           title: "Success",
           description: "Logged in successfully!",
         });
       }
-      
-      navigate('/dashboard');
+
+      // Navigate to intended destination on success
+      navigate(from, { replace: true });
+
     } catch (error: any) {
       toast({
         title: "Error",
@@ -77,14 +122,15 @@ const Login = () => {
 
   const handleGoogleLogin = async () => {
     setIsLoading(true);
-    
+
     try {
-      await signInWithPopup(auth, googleProvider);
+      const userCredential = await signInWithGoogle();
+      setUser(userCredential.user);
       toast({
         title: "Success",
         description: "Logged in with Google successfully!",
       });
-      navigate('/dashboard');
+      navigate(from, { replace: true });
     } catch (error: any) {
       toast({
         title: "Error",
