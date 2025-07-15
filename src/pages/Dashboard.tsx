@@ -85,7 +85,7 @@ const previousAppointments = [
 
 const Dashboard = () => {
   const navigate = useNavigate();
-  const { signOutUser } = useContext(AuthContext);
+  const { user, signOutUser } = useContext(AuthContext);
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState('upcoming');
   const [userInfo, setUserInfo] = useState({
@@ -98,6 +98,17 @@ const Dashboard = () => {
     bloodGroup: 'B+',
     emergencyContact: '+880 1756-789012'
   });
+
+  // Get user display information from Firebase user object
+  const getUserDisplayInfo = () => {
+    if (user) {
+      const displayName = user.displayName || user.email?.split('@')[0] || 'User';
+      const email = user.email || 'No email available';
+      return { name: displayName, email };
+    }
+    // Fallback to static data if no user
+    return { name: 'No user', email: 'please log in' };
+  };
 
   const handleEditAppointment = (appointmentId: string) => {
     console.log('Edit appointment:', appointmentId);
@@ -147,8 +158,8 @@ const Dashboard = () => {
           </div>
           <div className="flex items-center gap-4">
             <div className="text-right">
-              <p className="font-semibold text-gray-800">{userInfo.name}</p>
-              <p className="text-sm text-gray-600">{userInfo.studentId}</p>
+              <p className="font-semibold text-gray-800">{getUserDisplayInfo().name}</p>
+              <p className="text-sm text-gray-600">{getUserDisplayInfo().email}</p>
             </div>
             <Button variant="outline" onClick={handleLogout}>
               Logout
@@ -341,8 +352,8 @@ const Dashboard = () => {
                         <Label htmlFor="name">Full Name</Label>
                         <Input
                           id="name"
-                          value={userInfo.name}
-                          onChange={(e) => setUserInfo({...userInfo, name: e.target.value})}
+                          value={getUserDisplayInfo().name}
+                          disabled
                         />
                       </div>
                       <div className="space-y-2">
@@ -359,8 +370,9 @@ const Dashboard = () => {
                         <Input
                           id="email"
                           type="email"
-                          value={userInfo.email}
-                          onChange={(e) => setUserInfo({...userInfo, email: e.target.value})}
+                          value={getUserDisplayInfo().email}
+                          disabled
+                          
                         />
                       </div>
                       <div className="space-y-2">

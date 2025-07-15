@@ -20,18 +20,30 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import AppointmentForm from '@/components/AppointmentForm';
-import { getDoctorById } from '@/data/doctors';
-import { ArrowLeft, Star, Clock, User, Stethoscope } from 'lucide-react';
+import { ArrowLeft, Star, Clock, User, Stethoscope, Loader2 } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
+import { fetchDoctorById } from '@/services/api';
 
 const BookAppointment = () => {
   // Get doctor ID from URL parameters
   const { doctorId } = useParams<{ doctorId: string }>();
-  
+
   // Navigation hook for going back to home page
   const navigate = useNavigate();
-  
-  // Find the specific doctor based on the ID from URL
-  const doctor = doctorId ? getDoctorById(doctorId) : null;
+
+  // Fetch doctor data using React Query
+  const {
+    data: doctor,
+    isLoading,
+    isError,
+    error
+  } = useQuery({
+    queryKey: ['doctor', doctorId],
+    queryFn: () => doctorId ? fetchDoctorById(doctorId) : Promise.resolve(null),
+    enabled: !!doctorId, // Only run query if doctorId exists
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    retry: 3,
+  });
 
   /**
    * Navigate back to home page
@@ -39,6 +51,65 @@ const BookAppointment = () => {
   const handleGoBack = () => {
     navigate('/');
   };
+
+  /**
+   * Loading state
+   */
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-cream font-poppins flex items-center justify-center px-4">
+        <Card className="w-full max-w-md mx-auto bg-white shadow-xl border-0 rounded-xl text-center">
+          <CardContent className="p-8 space-y-6">
+            <div className="flex flex-col items-center gap-4">
+              <Loader2 className="h-8 w-8 animate-spin text-medical-primary" />
+              <p className="text-gray-600">Loading doctor information...</p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  /**
+   * Error state
+   */
+  if (isError) {
+    return (
+      <div className="min-h-screen bg-cream font-poppins flex items-center justify-center px-4">
+        <Card className="w-full max-w-md mx-auto bg-white shadow-xl border-0 rounded-xl text-center">
+          <CardContent className="p-8 space-y-6">
+
+            {/* Error icon */}
+            <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto">
+              <Stethoscope className="w-8 h-8 text-red-600" />
+            </div>
+
+            {/* Error message */}
+            <div className="space-y-2">
+              <h2 className="text-xl font-semibold text-gray-900">
+                Error Loading Doctor
+              </h2>
+              <p className="text-gray-600">
+                Failed to load doctor information. Please check if the server is running.
+              </p>
+              <p className="text-sm text-gray-500">
+                Error: {error?.message || 'Unknown error'}
+              </p>
+            </div>
+
+            {/* Back to home button */}
+            <Button
+              onClick={handleGoBack}
+              className="w-full bg-gradient-to-r from-medical-medium to-medical-dark hover:from-medical-dark hover:to-medical-medium"
+            >
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Back to Doctors
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   /**
    * Handle case when doctor is not found

@@ -13,9 +13,7 @@
  * Currently uses static data from the doctors.ts file
  */
 
-import { Badge } from "@/components/ui/badge";
-import { Star, Clock } from "lucide-react";
-import { doctors } from "@/data/doctors";
+import { Loader2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import DoctorCard from "@/components/DoctorCard";
 import NavbarDemo from "@/components/resizable-navbar-demo";
@@ -28,19 +26,37 @@ import FooterCTA from "@/components/FooterCTA";
 import AboutSection from "@/components/AboutSection";
 import FacilitiesSection from "@/components/FacilitiesSection";
 import ContactSection from "@/components/ContactSection";
+import { useQuery } from "@tanstack/react-query";
+import { fetchDoctors } from "@/services/api";
+
+
 
 /**
  * Index Component - Main Home Page
- * 
+ *
  * Features:
  * - Responsive design with Tailwind CSS
  * - Hero section with gradient background and animations
  * - Doctor cards grid layout
  * - Navigation to individual booking pages
  * - Uses improved medical theme colors
+ * - Fetches doctors data from API
  */
 const Index = () => {
   const navigate = useNavigate();
+
+  // Fetch doctors data using React Query
+  const {
+    data: doctors = [],
+    isLoading,
+    isError,
+    error
+  } = useQuery({
+    queryKey: ['doctors'],
+    queryFn: fetchDoctors,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    retry: 3,
+  });
 
   /**
    * Handle navigation to booking page for specific doctor
@@ -86,7 +102,33 @@ const Index = () => {
 
           {/* Doctors Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 max-w-7xl mx-auto">
-            {doctors.map((doctor, index) => (
+            {/* Loading State */}
+            {isLoading && (
+              <div className="col-span-full flex justify-center items-center py-20">
+                <div className="flex flex-col items-center gap-4">
+                  <Loader2 className="h-8 w-8 animate-spin text-medical-primary" />
+                  <p className="text-gray-600">Loading doctors...</p>
+                </div>
+              </div>
+            )}
+
+            {/* Error State */}
+            {isError && (
+              <div className="col-span-full flex justify-center items-center py-20">
+                <div className="flex flex-col items-center gap-4 text-center">
+                  <div className="text-red-500 text-xl">⚠️</div>
+                  <p className="text-gray-600">
+                    Failed to load doctors. Please check if the server is running on localhost:5000
+                  </p>
+                  <p className="text-sm text-gray-500">
+                    Error: {error?.message || 'Unknown error'}
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {/* Doctors List */}
+            {!isLoading && !isError && doctors.map((doctor, index) => (
               <motion.div
                 key={doctor.id}
                 initial={{ opacity: 0, y: 30 }}
@@ -94,12 +136,22 @@ const Index = () => {
                 transition={{ duration: 0.8, delay: index * 0.1 }}
                 viewport={{ once: true }}
               >
-                <DoctorCard 
+                <DoctorCard
                   doctor={doctor}
                   onBookAppointment={() => handleBookAppointment(doctor.id)}
                 />
               </motion.div>
             ))}
+
+            {/* Empty State */}
+            {!isLoading && !isError && doctors.length === 0 && (
+              <div className="col-span-full flex justify-center items-center py-20">
+                <div className="flex flex-col items-center gap-4 text-center">
+                  <div className="text-gray-400 text-xl">👨‍⚕️</div>
+                  <p className="text-gray-600">No doctors available at the moment.</p>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </section>
