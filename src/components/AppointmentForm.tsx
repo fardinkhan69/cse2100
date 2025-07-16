@@ -14,7 +14,7 @@
  * - Success/error feedback to user
  */
 
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -28,10 +28,12 @@ import { Badge } from '@/components/ui/badge';
 import { Calendar, Clock, CheckCircle, User } from 'lucide-react';
 import { Doctor } from '@/data/doctors';
 import { toast } from '@/hooks/use-toast';
+import { AuthContext } from '@/components/AuthProvider';
+import { useNavigate } from 'react-router-dom';
 
 // Form validation schema using Zod
 const appointmentSchema = z.object({
-  patientName: z.string().min(2, 'Name must be at least 2 characters'),
+  patientName: z.string().min(2, 'Name must be at least 2 characters').max(50, 'Name must be at most 50 characters'),
   problemDescription: z.string().min(10, 'Please provide more details about your problem'),
   appointmentDate: z.string().min(1, 'Please select a date'),
   appointmentTime: z.string().min(1, 'Please select a time slot'),
@@ -54,8 +56,13 @@ enum AppointmentStatus {
 }
 
 const AppointmentForm: React.FC<AppointmentFormProps> = ({ doctor }) => {
+  // Get authenticated user from context
+  const { user } = useContext(AuthContext);
+
   // State to track appointment booking status
   const [appointmentStatus, setAppointmentStatus] = useState<AppointmentStatus>(AppointmentStatus.IDLE);
+
+  const navigate = useNavigate();
   
   // React Hook Form setup with Zod validation
   const {
@@ -75,43 +82,61 @@ const AppointmentForm: React.FC<AppointmentFormProps> = ({ doctor }) => {
 
   /**
    * Form submission handler
-   * Simulates API call to book appointment
+   * Makes API call to book appointment
    */
   const onSubmit = async (data: AppointmentFormData) => {
     try {
       setAppointmentStatus(AppointmentStatus.SUBMITTING);
-      
-      // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      // In a real application, this would be an API call
-      console.log('Booking appointment with data:', {
-        ...data,
+
+      // Prepare appointment data for API
+      const appointmentData = {
         doctorId: doctor.id,
-        doctorName: doctor.name,
-        bookingTime: new Date().toISOString()
+        patientName: data.patientName,
+        userEmail: user?.email || '',
+        problemDescription: data.problemDescription,
+        appointmentDate: data.appointmentDate,
+        appointmentTime: data.appointmentTime,
+      };
+
+      console.log('Booking appointment with data:', appointmentData);
+
+      // Make API call to create appointment
+      const response = await fetch('http://localhost:5000/appointments', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(appointmentData),
       });
-      
-      // Set status to pending (simulating real-world scenario)
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to book appointment');
+      }
+
+      const result = await response.json();
+      console.log('Appointment booked successfully:', result);
+
+      // Set status to pending (appointment created successfully)
       setAppointmentStatus(AppointmentStatus.PENDING);
-      
+
       // Show success toast notification
       toast({
         title: "Appointment Booked Successfully! 🎉",
-        description: `Your appointment with ${doctor.name} is now pending confirmation.`,
+        description: `Your appointment with ${doctor.name} has been confirmed.`,
       });
-      
+
       // Reset form for next booking
       reset();
-      
+
     } catch (error) {
       console.error('Booking failed:', error);
       setAppointmentStatus(AppointmentStatus.IDLE);
-      
+
       // Show error toast
       toast({
         title: "Booking Failed",
-        description: "Something went wrong. Please try again.",
+        description: error instanceof Error ? error.message : "Something went wrong. Please try again.",
         variant: "destructive",
       });
     }
@@ -169,11 +194,11 @@ const AppointmentForm: React.FC<AppointmentFormProps> = ({ doctor }) => {
           </div>
           
           <Button 
-            onClick={() => setAppointmentStatus(AppointmentStatus.IDLE)}
+            onClick={() => navigate('/dashboard')}
             variant="outline"
             className="w-full"
           >
-            Book Another Appointment
+            Go to Dashboard
           </Button>
         </CardContent>
       </Card>
@@ -219,6 +244,8 @@ const AppointmentForm: React.FC<AppointmentFormProps> = ({ doctor }) => {
               <p className="text-red-500 text-xs">{errors.patientName.message}</p>
             )}
           </div>
+
+
 
           {/* Problem Description */}
           <div className="space-y-2">

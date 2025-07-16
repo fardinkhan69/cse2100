@@ -11,21 +11,21 @@
  * - Modern card-based design with animations
  */
 
-import React, { useState, useContext } from 'react';
-import { motion } from 'motion/react';
+import React, { useState, useContext, useEffect } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { 
-  Calendar, 
-  Clock, 
-  User, 
-  Edit, 
-  X, 
-  CheckCircle, 
+import {
+  Calendar,
+  Clock,
+  User,
+  Edit,
+  X,
+  CheckCircle,
   AlertCircle,
   Phone,
   Mail,
@@ -35,6 +35,7 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '@/components/AuthProvider';
 import { useToast } from '@/hooks/use-toast';
+import axios from 'axios';
 
 // Mock data for appointments and user info
 const upcomingAppointments = [
@@ -89,15 +90,18 @@ const Dashboard = () => {
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState('upcoming');
   const [userInfo, setUserInfo] = useState({
-    name: 'Ahmed Hassan',
+    name: user.name,
     studentId: '2020-04-001',
-    email: 'ahmed.hassan@student.ruet.ac.bd',
+    email: user.email,
     phone: '+880 1712-345678',
     department: 'Computer Science & Engineering',
     year: '4th Year',
     bloodGroup: 'B+',
     emergencyContact: '+880 1756-789012'
   });
+  const [upcomingAppointment, setUpcomingAppointment] = useState([]);
+  const [previousAppointment, setPreviousAppointment] = useState([]);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
 
   // Get user display information from Firebase user object
   const getUserDisplayInfo = () => {
@@ -110,15 +114,66 @@ const Dashboard = () => {
     return { name: 'No user', email: 'please log in' };
   };
 
-  const handleEditAppointment = (appointmentId: string) => {
-    console.log('Edit appointment:', appointmentId);
-    // TODO: Open edit modal or navigate to edit page
-  };
+  
 
-  const handleCancelAppointment = (appointmentId: string) => {
-    console.log('Cancel appointment:', appointmentId);
-    // TODO: Show confirmation dialog and cancel appointment
-  };
+  useEffect(() => {
+    if (!user) return;
+    const fetchComponent = async () => {
+      try {
+        const res = await axios.get(`http://localhost:5000/appointments`, {
+          params: { email: user.email }
+        });
+        const appointments = res.data.data;
+        let upcoming = [];
+        let previous = [];
+        let newAppointments=[]
+
+        const now = new Date();
+
+        const enrichedAppointments = await Promise.all(
+          appointments.map(async (appt) => {
+            try {
+              const doctorRes = await axios.get(`http://localhost:5000/doctors/${appt.doctorId}`);
+              return {
+                ...appt,
+                roomNo : Math.floor(Math.random() * (300 - 100 + 1)) + 100,
+                doctorInfo: doctorRes.data.data
+              };
+              
+            } catch (err) {
+              console.error(`Failed to fetch doctor for ID ${appt.doctorId}`, err);
+              return appt; // Fallback without doctor data
+            }
+          })
+        );
+
+        
+
+
+        enrichedAppointments.forEach(appt => {
+          const combinedDateTimeStr = `${appt.appointmentDate} ${appt.appointmentTime}`;
+          const appointmentDateTime = new Date(combinedDateTimeStr);
+
+          if (appointmentDateTime > now) {
+            upcoming.push(appt);
+          } else {
+            previous.push(appt);
+          }
+
+
+          setUpcomingAppointment(upcoming);
+          setPreviousAppointment(previous);
+              console.log(upcomingAppointment);
+
+        })
+      } catch (err) {
+        console.log(err);
+      }
+    }
+    fetchComponent();
+    
+  }, []);
+  
 
   const handleLogout = async () => {
     try {
@@ -137,6 +192,37 @@ const Dashboard = () => {
     }
   };
 
+  const handleEditAppointment = (appointmentId: string) => {
+    console.log('Edit appointment:', appointmentId);
+    // TODO: Open edit modal or navigate to edit page
+  };
+
+  const handleCancelAppointment = async(appointmentId: string) => {
+    console.log('Cancel appointment:', appointmentId);
+    try{
+      const res = await axios.delete(`http://localhost:5000/appointments/${appointmentId}`);
+      console.log(res);
+      const updatedAppointments = upcomingAppointment.filter((appt) => appt._id !== appointmentId);
+      setUpcomingAppointment(updatedAppointments);
+
+      // Show success modal instead of toast
+      setShowSuccessModal(true);
+
+      // Auto-hide modal after 3 seconds
+      setTimeout(() => {
+        setShowSuccessModal(false);
+      }, 3000);
+
+    }catch(err){
+      console.log(err);
+      toast({
+        title: "Error",
+        description: "Failed to cancel appointment. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <div className="min-h-screen bg-cream">
       {/* Header */}
@@ -147,7 +233,7 @@ const Dashboard = () => {
         className="bg-white shadow-sm border-b border-gray-200 px-6 py-4"
       >
         <div className="flex justify-between items-center max-w-7xl mx-auto">
-          <div className="flex items-center gap-4" onClick={() => navigate('/')} style={{cursor:'pointer'}}>
+          <div className="flex items-center gap-4" onClick={() => navigate('/')} style={{ cursor: 'pointer' }}>
             <div className="h-10 w-10 rounded-full bg-medical-medium flex items-center justify-center">
               <span className="text-white font-bold text-lg">R</span>
             </div>
@@ -176,7 +262,7 @@ const Dashboard = () => {
           transition={{ duration: 0.5, delay: 0.1 }}
         >
           <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-            
+
             {/* Tab Navigation */}
             <TabsList className="grid grid-cols-3 w-full max-w-md mx-auto h-12 bg-gray-100">
               <TabsTrigger value="upcoming" className="font-medium">Upcoming</TabsTrigger>
@@ -188,7 +274,7 @@ const Dashboard = () => {
             <TabsContent value="upcoming" className="space-y-6">
               <div className="flex justify-between items-center">
                 <h2 className="text-2xl font-bold text-gray-800">Upcoming Appointments</h2>
-                <Button 
+                <Button
                   onClick={() => navigate('/')}
                   className="bg-medical-medium hover:bg-medical-dark"
                 >
@@ -198,7 +284,7 @@ const Dashboard = () => {
               </div>
 
               <div className="grid gap-6">
-                {upcomingAppointments.map((appointment, index) => (
+                {upcomingAppointment.map((appointment, index) => (
                   <motion.div
                     key={appointment.id}
                     initial={{ opacity: 0, x: -20 }}
@@ -209,9 +295,9 @@ const Dashboard = () => {
                       <CardHeader className="pb-4">
                         <div className="flex justify-between items-start">
                           <div>
-                            <CardTitle className="text-lg text-gray-800">{appointment.doctorName}</CardTitle>
+                            <CardTitle className="text-lg text-gray-800">{appointment.doctorInfo.name}</CardTitle>
                             <CardDescription className="text-medical-dark font-medium">
-                              {appointment.specialization}
+                              {appointment.doctorInfo.specialization}
                             </CardDescription>
                           </div>
                           <div className="flex gap-2">
@@ -226,7 +312,7 @@ const Dashboard = () => {
                             <Button
                               size="sm"
                               variant="destructive"
-                              onClick={() => handleCancelAppointment(appointment.id)}
+                              onClick={() => handleCancelAppointment(appointment._id)}
                               className="p-2"
                             >
                               <X className="w-4 h-4" />
@@ -238,30 +324,30 @@ const Dashboard = () => {
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                           <div className="flex items-center gap-2">
                             <Calendar className="w-4 h-4 text-gray-500" />
-                            <span className="text-sm font-medium">{appointment.date}</span>
+                            <span className="text-sm font-medium">{appointment.appointmentDate}</span>
                           </div>
                           <div className="flex items-center gap-2">
                             <Clock className="w-4 h-4 text-gray-500" />
-                            <span className="text-sm font-medium">{appointment.time}</span>
+                            <span className="text-sm font-medium">{appointment.appointmentTime}</span>
                           </div>
                           <div className="flex items-center gap-2">
                             <MapPin className="w-4 h-4 text-gray-500" />
-                            <span className="text-sm font-medium">{appointment.location}</span>
+                            <span className="text-sm font-medium">{appointment.roomNo}</span>
                           </div>
                           <div>
-                            <Badge 
-                              variant={appointment.status === 'Confirmed' ? 'default' : 'secondary'}
-                              className={appointment.status === 'Confirmed' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}
+                            <Badge
+                              variant={appointment.booking === true ? 'default' : 'secondary'}
+                              className={appointment.booking === true ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}
                             >
-                              {appointment.status === 'Confirmed' && <CheckCircle className="w-3 h-3 mr-1" />}
-                              {appointment.status === 'Pending' && <AlertCircle className="w-3 h-3 mr-1" />}
-                              {appointment.status}
+                              {appointment.booking === true && <CheckCircle className="w-3 h-3 mr-1" />}
+                              {appointment.booking === false && <AlertCircle className="w-3 h-3 mr-1" />}
+                              {appointment.booking ? "Confirmed" : "Pending"}
                             </Badge>
                           </div>
                         </div>
                         <div className="mt-4 p-3 bg-gray-50 rounded-lg">
                           <p className="text-sm text-gray-700">
-                            <span className="font-medium">Reason:</span> {appointment.reason}
+                            <span className="font-medium">Reason:</span> {appointment.problemDescription.length > 30 ? appointment.problemDescription.slice(0, 30) + "..." : appointment.problemDescription}
                           </p>
                         </div>
                       </CardContent>
@@ -276,7 +362,7 @@ const Dashboard = () => {
               <h2 className="text-2xl font-bold text-gray-800">Previous Appointments</h2>
 
               <div className="grid gap-6">
-                {previousAppointments.map((appointment, index) => (
+                {previousAppointment.map((appointment, index) => (
                   <motion.div
                     key={appointment.id}
                     initial={{ opacity: 0, x: -20 }}
@@ -372,7 +458,7 @@ const Dashboard = () => {
                           type="email"
                           value={getUserDisplayInfo().email}
                           disabled
-                          
+
                         />
                       </div>
                       <div className="space-y-2">
@@ -380,7 +466,7 @@ const Dashboard = () => {
                         <Input
                           id="phone"
                           value={userInfo.phone}
-                          onChange={(e) => setUserInfo({...userInfo, phone: e.target.value})}
+                          onChange={(e) => setUserInfo({ ...userInfo, phone: e.target.value })}
                         />
                       </div>
                       <div className="space-y-2">
@@ -406,7 +492,7 @@ const Dashboard = () => {
                         <Input
                           id="bloodGroup"
                           value={userInfo.bloodGroup}
-                          onChange={(e) => setUserInfo({...userInfo, bloodGroup: e.target.value})}
+                          onChange={(e) => setUserInfo({ ...userInfo, bloodGroup: e.target.value })}
                         />
                       </div>
                       <div className="space-y-2">
@@ -414,7 +500,7 @@ const Dashboard = () => {
                         <Input
                           id="emergencyContact"
                           value={userInfo.emergencyContact}
-                          onChange={(e) => setUserInfo({...userInfo, emergencyContact: e.target.value})}
+                          onChange={(e) => setUserInfo({ ...userInfo, emergencyContact: e.target.value })}
                         />
                       </div>
                     </div>
@@ -430,6 +516,91 @@ const Dashboard = () => {
           </Tabs>
         </motion.div>
       </div>
+
+      {/* Success Modal */}
+      <AnimatePresence>
+        {showSuccessModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+            onClick={() => setShowSuccessModal(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.5, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.5, opacity: 0 }}
+              transition={{
+                type: "spring",
+                stiffness: 300,
+                damping: 25
+              }}
+              className="bg-white rounded-2xl p-8 max-w-md mx-4 text-center shadow-2xl"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Animated Check Circle */}
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{
+                  delay: 0.2,
+                  type: "spring",
+                  stiffness: 200,
+                  damping: 15
+                }}
+                className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6"
+              >
+                <motion.div
+                  initial={{ scale: 0, rotate: -180 }}
+                  animate={{ scale: 1, rotate: 0 }}
+                  transition={{
+                    delay: 0.4,
+                    type: "spring",
+                    stiffness: 200,
+                    damping: 15
+                  }}
+                >
+                  <CheckCircle className="w-12 h-12 text-green-600" />
+                </motion.div>
+              </motion.div>
+
+              {/* Success Message */}
+              <motion.h2
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.6 }}
+                className="text-2xl font-bold text-gray-800 mb-2"
+              >
+                Appointment Cancelled
+              </motion.h2>
+
+              <motion.p
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.7 }}
+                className="text-gray-600 mb-6"
+              >
+                Your appointment has been successfully cancelled.
+              </motion.p>
+
+              {/* Close Button */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.8 }}
+              >
+                <Button
+                  onClick={() => setShowSuccessModal(false)}
+                  className="bg-green-600 hover:bg-green-700 text-white px-8 py-2 rounded-lg"
+                >
+                  OK
+                </Button>
+              </motion.div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

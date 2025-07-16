@@ -70,15 +70,14 @@ const Index = () => {
     <div className="min-h-screen bg-gradient-to-br from-cream via-white to-medical-light/20">
       {/* Navigation Bar */}
       <NavbarDemo />
-      
+
       {/* Hero Section */}
       <HeroSection />
 
+
+
       {/* Impact Section */}
       <ImpactSection />
-
-      {/* About Section */}
-      <AboutSection />
 
       {/* Doctors Section */}
       <section id="doctors" className="py-24 px-4 bg-gradient-to-br from-cream to-white">
@@ -95,7 +94,7 @@ const Index = () => {
               Meet Our Medical Experts
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
-              Our experienced medical professionals are here to provide you with the best healthcare services. 
+              Our experienced medical professionals are here to provide you with the best healthcare services.
               All consultations and treatments are provided free of charge to the RUET community.
             </p>
           </motion.div>
@@ -155,6 +154,11 @@ const Index = () => {
           </div>
         </div>
       </section>
+
+      {/* About Section */}
+      <AboutSection />
+
+
 
       {/* Services Section */}
       <ServicesSection />
