@@ -59,6 +59,28 @@ interface SingleDoctorApiResponse {
 }
 
 /**
+ * Doctor Registration Data interface
+ */
+export interface DoctorRegistrationData {
+  name: string;
+  specialization: string;
+  availableSlots: string[];
+  experience: string;
+  rating?: number;
+  image?: string;
+  bio: string;
+}
+
+/**
+ * API Error Response interface
+ */
+interface ApiErrorResponse {
+  success: false;
+  message: string;
+  errors?: string[];
+}
+
+/**
  * Transform API doctor data to match our Doctor interface
  */
 const transformDoctorData = (apiDoctor: DoctorApiResponse['data'][0]): Doctor => ({
@@ -111,6 +133,48 @@ export const fetchDoctorById = async (doctorId: string): Promise<Doctor | null> 
     if (axios.isAxiosError(error) && error.response?.status === 404) {
       return null;
     }
+    throw error;
+  }
+};
+
+/**
+ * Create a new doctor registration
+ * @param doctorData - The doctor registration data
+ * @returns Promise<Doctor> - The created doctor object
+ */
+export const createDoctor = async (doctorData: DoctorRegistrationData): Promise<Doctor> => {
+  try {
+    const response = await api.post<SingleDoctorApiResponse>('/doctors', doctorData);
+
+    if (!response.data.success) {
+      throw new Error('Failed to create doctor');
+    }
+
+    return transformDoctorData(response.data.data);
+  } catch (error) {
+    console.error('Error creating doctor:', error);
+
+    // Handle axios errors with better error messages
+    if (axios.isAxiosError(error)) {
+      const errorData = error.response?.data as ApiErrorResponse;
+
+      if (errorData?.message) {
+        throw new Error(errorData.message);
+      }
+
+      if (error.response?.status === 400) {
+        throw new Error('Invalid doctor registration data. Please check all required fields.');
+      }
+
+      if (error.response?.status === 409) {
+        throw new Error('A doctor with this name and specialization already exists.');
+      }
+
+      if (error.response?.status === 500) {
+        throw new Error('Server error. Please try again later.');
+      }
+    }
+
     throw error;
   }
 };

@@ -99,6 +99,28 @@ export default function NavbarDemo() {
             >
               Dashboard
             </NavLink>
+
+            <NavLink
+              to="/doctor-dashboard-demo"
+              className={({ isActive }) =>
+                `relative px-4 py-2 text-neutral-600 dark:text-neutral-300 ${
+                  isActive ? 'text-medical-medium font-semibold' : ''
+                }`
+              }
+            >
+              Doctor Demo
+            </NavLink>
+
+            <NavLink
+              to="/doctor-registration"
+              className={({ isActive }) =>
+                `relative px-4 py-2 text-neutral-600 dark:text-neutral-300 ${
+                  isActive ? 'text-medical-medium font-semibold' : ''
+                }`
+              }
+            >
+              Doctor Registration
+            </NavLink>
           </div>
 
           {/* Dynamic User/Login Button */}
@@ -189,6 +211,22 @@ export default function NavbarDemo() {
               className="relative text-neutral-600 dark:text-neutral-300 block py-2"
             >
               Dashboard
+            </NavLink>
+
+            <NavLink
+              to="/doctor-dashboard-demo"
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="relative text-neutral-600 dark:text-neutral-300 block py-2"
+            >
+              Doctor Demo
+            </NavLink>
+
+            <NavLink
+              to="/doctor-registration"
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="relative text-neutral-600 dark:text-neutral-300 block py-2"
+            >
+              Doctor Registration
             </NavLink>
 
             <div className="flex w-full flex-col gap-4 mt-4">

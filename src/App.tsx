@@ -26,6 +26,9 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
+import DoctorDashboard from "./pages/DoctorDashboard";
+import DoctorDashboardDemo from "./pages/DoctorDashboardDemo";
+import DoctorRegistration from "./pages/DoctorRegistration";
 import BookAppointment from "./pages/BookAppointment";
 import NotFound from "./pages/NotFound";
 import AuthProvider from "./components/AuthProvider";
@@ -75,6 +78,15 @@ const App = () => (
                 <Dashboard />
               </PrivateRoute>
             } />
+
+            {/* Doctor Dashboard route - doctor appointment management */}
+            <Route path="/doctor-dashboard" element={<DoctorDashboard />} />
+
+            {/* Doctor Dashboard Demo route - public demo without authentication */}
+            <Route path="/doctor-dashboard-demo" element={<DoctorDashboardDemo />} />
+
+            {/* Doctor Registration route - public registration form */}
+            <Route path="/doctor-registration" element={<DoctorRegistration />} />
 
             {/* Protected Individual doctor booking page - uses dynamic parameter */}
             <Route path="/book/:doctorId" element={
