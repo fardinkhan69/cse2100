@@ -21,7 +21,7 @@ import { motion } from "motion/react";
 import HeroSection from "@/components/HeroSection";
 import ImpactSection from "@/components/ImpactSection";
 import ServicesSection from "@/components/ServicesSection";
-import TestimonialsSection from "@/components/TestimonialsSection";
+import ModernTestimonialsSection from "@/components/ModernTestimonialsSection";
 import FooterCTA from "@/components/FooterCTA";
 import AboutSection from "@/components/AboutSection";
 import FacilitiesSection from "@/components/FacilitiesSection";
@@ -166,8 +166,8 @@ const Index = () => {
       {/* Facilities Section */}
       <FacilitiesSection />
 
-      {/* Testimonials Section */}
-      <TestimonialsSection />
+      {/* Modern Testimonials Section */}
+      <ModernTestimonialsSection />
 
       {/* Contact Section */}
       <ContactSection />
