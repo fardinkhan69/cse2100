@@ -10,7 +10,7 @@
  * - Uses dummy data for demonstration
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -44,11 +44,13 @@ import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import {
   fetchDoctors,
+  fetchDoctorByEmail,
   fetchAppointmentsByDoctorId,
   updateAppointmentBooking,
   Appointment as ApiAppointment
 } from '@/services/api';
 import PrescriptionModal from '@/components/PrescriptionModal';
+import { AuthContext } from '@/components/AuthProvider';
 
 // Use the API Appointment interface
 type Appointment = ApiAppointment;
@@ -71,6 +73,7 @@ interface DoctorProfile {
 
 const DoctorDashboard: React.FC = () => {
   const navigate = useNavigate();
+  const { user, signOutUser, isLoading: authLoading } = useContext(AuthContext);
   const [activeTab, setActiveTab] = useState('upcoming');
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -90,6 +93,22 @@ const DoctorDashboard: React.FC = () => {
   const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
   const { toast } = useToast();
 
+  // Redirect to login if user is not authenticated
+  useEffect(() => {
+    // Don't redirect while auth is still loading
+    if (authLoading) return;
+    
+    if (!user) {
+      toast({
+        title: "Authentication Required",
+        description: "Please log in to access the doctor dashboard.",
+        variant: "destructive",
+      });
+      navigate('/login');
+      return;
+    }
+  }, [user, navigate, toast, authLoading]);
+
   // Fetch doctor data and appointments on component mount
   useEffect(() => {
     const fetchDoctorData = async () => {
@@ -97,15 +116,18 @@ const DoctorDashboard: React.FC = () => {
       setError(null);
 
       try {
-        // Fetch all doctors to get the first one (in a real app, this would be based on authentication)
-        const doctors = await fetchDoctors();
-
-        if (doctors.length === 0) {
-          throw new Error('No doctors found. Please register as a doctor first.');
+        // Check if user is authenticated
+        if (!user || !user.email) {
+          throw new Error('You must be logged in to access the doctor dashboard.');
         }
 
-        // Use the first doctor for demo purposes (in real app, this would be the authenticated doctor)
-        const doctor = doctors[0];
+        // Fetch the authenticated doctor's profile by email
+        const doctor = await fetchDoctorByEmail(user.email);
+
+        if (!doctor) {
+          throw new Error(`No doctor profile found for ${user.email}. Please register as a doctor first.`);
+        }
+
         setCurrentDoctorId(doctor._id);
 
         // Set doctor profile data
@@ -114,7 +136,7 @@ const DoctorDashboard: React.FC = () => {
           name: doctor.name,
           specialization: doctor.specialization,
           experience: doctor.experience,
-          email: doctor.email || '', // Use email from API if available
+          email: doctor.email || user.email,
           bio: doctor.bio,
           rating: doctor.rating,
           image: doctor.image,
@@ -144,7 +166,7 @@ const DoctorDashboard: React.FC = () => {
     };
 
     fetchDoctorData();
-  }, [toast]);
+  }, [toast, user]);
 
   // Filter appointments based on date only (not booking status)
   const getUpcomingAppointments = () => {
@@ -279,13 +301,25 @@ const DoctorDashboard: React.FC = () => {
   };
 
   // Handle logout
-  const handleLogout = () => {
-    setIsMobileMenuOpen(false);
-    toast({
-      title: "Logged Out",
-      description: "You have been successfully logged out.",
-    });
-    navigate('/');
+  const handleLogout = async () => {
+    try {
+      setIsMobileMenuOpen(false);
+      await signOutUser();
+      
+      toast({
+        title: "Logged Out",
+        description: "You have been successfully logged out.",
+      });
+      
+      navigate('/');
+    } catch (error) {
+      console.error('Error during logout:', error);
+      toast({
+        title: "Logout Error",
+        description: "There was an error logging out. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   // Handle settings
@@ -320,6 +354,19 @@ const DoctorDashboard: React.FC = () => {
 
   const upcomingAppointments = getUpcomingAppointments();
   const pastAppointments = getPastAppointments();
+
+  // Show loading state while auth is loading
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-cream flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-medical-medium border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <h2 className="text-xl font-semibold text-gray-700 mb-2">Checking Authentication</h2>
+          <p className="text-gray-500">Please wait while we verify your credentials...</p>
+        </div>
+      </div>
+    );
+  }
 
   // Show loading state while fetching data
   if (isLoadingData) {

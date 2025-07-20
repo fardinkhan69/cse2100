@@ -267,6 +267,22 @@ export const createDoctor = async (doctorData: DoctorRegistrationData): Promise<
 };
 
 /**
+ * Fetch a doctor by email address
+ * @param email - The email address of the doctor
+ * @returns Promise<Doctor | null> - Doctor object or null if not found
+ */
+export const fetchDoctorByEmail = async (email: string): Promise<Doctor | null> => {
+  try {
+    const allDoctors = await fetchDoctors();
+    const doctor = allDoctors.find(doc => doc.email?.toLowerCase() === email.toLowerCase());
+    return doctor || null;
+  } catch (error) {
+    console.error('Error fetching doctor by email:', error);
+    throw error;
+  }
+};
+
+/**
  * Get available time slots for a specific doctor
  * @param doctorId - The ID of the doctor
  * @returns Promise<string[]> - Array of available time slots
