@@ -6,7 +6,8 @@
  */
 
 export interface Doctor {
-  id: string;
+  _id: string;
+  id: string; // Keep for backward compatibility
   name: string;
   specialization: string;
   availableSlots: string[];
@@ -14,6 +15,9 @@ export interface Doctor {
   rating: number;
   image?: string;
   bio: string;
+  email?: string;
+  createdAt?: string;
+  __v?: number;
 }
 
 // Real doctor data from the backend API

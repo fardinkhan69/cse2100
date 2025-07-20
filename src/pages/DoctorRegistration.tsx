@@ -37,6 +37,7 @@ import { createDoctor, DoctorRegistrationData } from '@/services/api';
 // Validation schema matching database structure
 const doctorSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters').max(100, 'Name must be at most 100 characters'),
+  email: z.string().email('Please enter a valid email address').min(1, 'Email is required'),
   specialization: z.string().min(1, 'Specialization is required'),
   availableSlots: z.array(z.string()).min(1, 'At least one time slot is required'),
   experience: z.string().regex(/^\d+\s+years?$/i, 'Experience must be in format "X years" (e.g., "15 years")'),
@@ -69,6 +70,7 @@ const DoctorRegistration = () => {
     resolver: zodResolver(doctorSchema),
     defaultValues: {
       name: '',
+      email: '',
       specialization: '',
       availableSlots: [],
       experience: '',
@@ -122,7 +124,7 @@ const DoctorRegistration = () => {
     let fieldsToValidate: (keyof DoctorFormData)[] = [];
 
     if (currentStep === 1) {
-      fieldsToValidate = ['name', 'specialization', 'experience'];
+      fieldsToValidate = ['name', 'email', 'specialization', 'experience'];
     } else if (currentStep === 2) {
       fieldsToValidate = ['availableSlots'];
     }
@@ -145,6 +147,7 @@ const DoctorRegistration = () => {
       // Prepare data for backend (matching database schema)
       const doctorData: DoctorRegistrationData = {
         name: data.name,
+        email: data.email,
         specialization: data.specialization,
         availableSlots: data.availableSlots,
         experience: data.experience,
@@ -221,6 +224,23 @@ const DoctorRegistration = () => {
             />
             {errors.name && (
               <p className="text-red-500 text-sm mt-1">{errors.name.message}</p>
+            )}
+          </div>
+
+          {/* Email */}
+          <div>
+            <Label htmlFor="email" className="text-sm font-semibold text-gray-700 mb-2 block">
+              Email Address *
+            </Label>
+            <Input
+              id="email"
+              type="email"
+              {...register('email')}
+              placeholder="doctor@example.com"
+              className="h-12 text-base"
+            />
+            {errors.email && (
+              <p className="text-red-500 text-sm mt-1">{errors.email.message}</p>
             )}
           </div>
 

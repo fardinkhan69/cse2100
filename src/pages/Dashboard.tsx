@@ -30,11 +30,24 @@ import {
   Phone,
   Mail,
   MapPin,
-  FileText
+  FileText,
+  Download,
+  Pill,
+  Stethoscope,
+  Eye
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '@/components/AuthProvider';
 import { useToast } from '@/hooks/use-toast';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { fetchPrescriptionsByPatient, type Prescription } from '@/services/api';
+import { generatePrescriptionPDF } from '@/utils/pdfGenerator';
 import axios from 'axios';
 
 // Mock data for appointments and user info
@@ -102,6 +115,10 @@ const Dashboard = () => {
   const [upcomingAppointment, setUpcomingAppointment] = useState([]);
   const [previousAppointment, setPreviousAppointment] = useState([]);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [prescriptions, setPrescriptions] = useState<Prescription[]>([]);
+  const [selectedPrescription, setSelectedPrescription] = useState<Prescription | null>(null);
+  const [prescriptionModalOpen, setPrescriptionModalOpen] = useState(false);
+  const [loadingPrescriptions, setLoadingPrescriptions] = useState<{[key: string]: boolean}>({});
 
   // Get user display information from Firebase user object
   const getUserDisplayInfo = () => {
@@ -159,13 +176,18 @@ const Dashboard = () => {
           } else {
             previous.push(appt);
           }
+        });
 
+        setUpcomingAppointment(upcoming);
+        setPreviousAppointment(previous);
 
-          setUpcomingAppointment(upcoming);
-          setPreviousAppointment(previous);
-              console.log(upcomingAppointment);
-
-        })
+        // Fetch prescriptions for the user
+        try {
+          const userPrescriptions = await fetchPrescriptionsByPatient(user.email);
+          setPrescriptions(userPrescriptions);
+        } catch (error) {
+          console.error('Error fetching prescriptions:', error);
+        }
       } catch (err) {
         console.log(err);
       }
@@ -223,6 +245,68 @@ const Dashboard = () => {
     }
   };
 
+  // Helper function to check if prescription exists for an appointment
+  const getPrescriptionForAppointment = (appointmentId: string): Prescription | null => {
+    const prescription = prescriptions.find(prescription => {
+      // Handle both string and object appointmentId
+      let prescriptionAppointmentId: string;
+
+      if (typeof prescription.appointmentId === 'string') {
+        prescriptionAppointmentId = prescription.appointmentId;
+      } else if (prescription.appointmentId && typeof prescription.appointmentId === 'object' && '_id' in prescription.appointmentId) {
+        prescriptionAppointmentId = (prescription.appointmentId as any)._id;
+      } else {
+        prescriptionAppointmentId = String(prescription.appointmentId);
+      }
+
+      return prescriptionAppointmentId === appointmentId;
+    });
+
+    return prescription || null;
+  };
+
+  // Handle viewing prescription
+  const handleViewPrescription = (appointmentId: string) => {
+    const prescription = getPrescriptionForAppointment(appointmentId);
+    if (prescription) {
+      setSelectedPrescription(prescription);
+      setPrescriptionModalOpen(true);
+    }
+  };
+
+  // Handle closing prescription modal
+  const handleClosePrescriptionModal = () => {
+    setPrescriptionModalOpen(false);
+    setSelectedPrescription(null);
+  };
+
+  // Handle PDF download
+  const handleDownloadPDF = (prescription: Prescription) => {
+    try {
+      generatePrescriptionPDF(prescription);
+      toast({
+        title: "PDF Downloaded",
+        description: `Prescription PDF for ${prescription.patientName} has been downloaded.`,
+      });
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      toast({
+        title: "Download Error",
+        description: "Failed to generate PDF. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  // Format date for display
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+  };
+
   return (
     <div className="min-h-screen bg-cream">
       {/* Header */}
@@ -263,6 +347,8 @@ const Dashboard = () => {
         >
           <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
 
+
+
             {/* Tab Navigation */}
             <TabsList className="grid grid-cols-3 w-full max-w-md mx-auto h-12 bg-gray-100">
               <TabsTrigger value="upcoming" className="font-medium">Upcoming</TabsTrigger>
@@ -301,6 +387,17 @@ const Dashboard = () => {
                             </CardDescription>
                           </div>
                           <div className="flex gap-2">
+                            {getPrescriptionForAppointment(appointment._id) && (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => handleViewPrescription(appointment._id)}
+                                className="border-medical-medium text-medical-medium hover:bg-medical-medium hover:text-white p-2"
+                                title="View Prescription"
+                              >
+                                <Eye className="w-4 h-4" />
+                              </Button>
+                            )}
                             <Button
                               size="sm"
                               variant="outline"
@@ -373,26 +470,39 @@ const Dashboard = () => {
                       <CardHeader className="pb-4">
                         <div className="flex justify-between items-start">
                           <div>
-                            <CardTitle className="text-lg text-gray-800">{appointment.doctorName}</CardTitle>
+                            <CardTitle className="text-lg text-gray-800">{appointment.doctorInfo.name}</CardTitle>
                             <CardDescription className="text-medical-dark font-medium">
-                              {appointment.specialization}
+                             {appointment.doctorInfo.specialization}
                             </CardDescription>
                           </div>
-                          <Badge className="bg-green-100 text-green-700">
-                            <CheckCircle className="w-3 h-3 mr-1" />
-                            Completed
-                          </Badge>
+                          <div className="flex items-center gap-2">
+                            <Badge className="bg-green-100 text-green-700">
+                              <CheckCircle className="w-3 h-3 mr-1" />
+                              Completed
+                            </Badge>
+                            {getPrescriptionForAppointment(appointment._id) && (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => handleViewPrescription(appointment._id)}
+                                className="border-medical-medium text-medical-medium hover:bg-medical-medium hover:text-white"
+                              >
+                                <Eye className="w-4 h-4 mr-1" />
+                                View Prescription
+                              </Button>
+                            )}
+                          </div>
                         </div>
                       </CardHeader>
                       <CardContent>
                         <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-4">
                           <div className="flex items-center gap-2">
                             <Calendar className="w-4 h-4 text-gray-500" />
-                            <span className="text-sm font-medium">{appointment.date}</span>
+                            <span className="text-sm font-medium">{appointment.appointmentDate}</span>
                           </div>
                           <div className="flex items-center gap-2">
                             <Clock className="w-4 h-4 text-gray-500" />
-                            <span className="text-sm font-medium">{appointment.time}</span>
+                            <span className="text-sm font-medium">{appointment.appointmentTime}</span>
                           </div>
                           <div className="flex items-center gap-2">
                             <FileText className="w-4 h-4 text-gray-500" />
@@ -402,14 +512,36 @@ const Dashboard = () => {
                         <div className="space-y-3">
                           <div className="p-3 bg-gray-50 rounded-lg">
                             <p className="text-sm text-gray-700">
-                              <span className="font-medium">Reason:</span> {appointment.reason}
+                              <span className="font-medium">Reason:</span> {appointment.problemDescription.length > 30 ? appointment.problemDescription.slice(0, 30) + "..." : appointment.problemDescription}
                             </p>
                           </div>
-                          <div className="p-3 bg-blue-50 rounded-lg">
-                            <p className="text-sm text-gray-700">
-                              <span className="font-medium">Prescription:</span> {appointment.prescription}
-                            </p>
-                          </div>
+                          {getPrescriptionForAppointment(appointment._id) ? (
+                            <div className="p-3 bg-green-50 rounded-lg border border-green-200">
+                              <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-2">
+                                  <FileText className="w-4 h-4 text-green-600" />
+                                  <span className="font-medium text-green-700">Prescription Available</span>
+                                </div>
+                                <Button
+                                  size="sm"
+                                  onClick={() => handleViewPrescription(appointment._id)}
+                                  className="bg-green-600 hover:bg-green-700 text-white"
+                                >
+                                  <Eye className="w-4 h-4 mr-1" />
+                                  View Details
+                                </Button>
+                              </div>
+                              <p className="text-sm text-green-600 mt-2">
+                                Click "View Details" to see your complete prescription and download PDF
+                              </p>
+                            </div>
+                          ) : (
+                            <div className="p-3 bg-gray-50 rounded-lg">
+                              <p className="text-sm text-gray-500">
+                                <span className="font-medium">Status:</span> No prescription available for this appointment
+                              </p>
+                            </div>
+                          )}
                         </div>
                       </CardContent>
                     </Card>
@@ -601,6 +733,122 @@ const Dashboard = () => {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Prescription Modal */}
+      <Dialog open={prescriptionModalOpen} onOpenChange={handleClosePrescriptionModal}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-xl font-bold text-medical-dark">
+              <FileText className="w-6 h-6" />
+              Medical Prescription
+            </DialogTitle>
+            <DialogDescription>
+              {selectedPrescription && `Prescription details for ${selectedPrescription.patientName}`}
+            </DialogDescription>
+          </DialogHeader>
+
+          {selectedPrescription && (
+            <div className="space-y-6">
+              {/* Header with Download Button */}
+              <div className="flex justify-between items-center p-4 bg-medical-light/20 rounded-lg">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-medical-medium rounded-full flex items-center justify-center">
+                    <Stethoscope className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-gray-800">RUET Medical Center</h3>
+                    <p className="text-sm text-gray-600">Medical Prescription</p>
+                  </div>
+                </div>
+                <Button
+                  onClick={() => handleDownloadPDF(selectedPrescription)}
+                  className="bg-medical-medium hover:bg-medical-dark text-white"
+                >
+                  <Download className="w-4 h-4 mr-2" />
+                  Download PDF
+                </Button>
+              </div>
+
+              {/* Patient & Doctor Info */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-gray-50 rounded-lg">
+                <div>
+                  <h4 className="font-semibold text-gray-700 mb-2">Patient Information</h4>
+                  <p className="text-gray-600"><span className="font-medium">Name:</span> {selectedPrescription.patientName}</p>
+                  <p className="text-gray-600"><span className="font-medium">Email:</span> {selectedPrescription.patientId}</p>
+                </div>
+                <div>
+                  <h4 className="font-semibold text-gray-700 mb-2">Doctor Information</h4>
+                  <p className="text-gray-600"><span className="font-medium">Doctor:</span> {selectedPrescription.doctorName}</p>
+                  <p className="text-gray-600"><span className="font-medium">Date:</span> {formatDate(selectedPrescription.date)}</p>
+                </div>
+              </div>
+
+              {/* Symptoms */}
+              <div>
+                <h4 className="font-semibold text-gray-700 mb-2">Symptoms</h4>
+                <p className="text-gray-600 bg-gray-50 p-3 rounded-lg">{selectedPrescription.symptoms}</p>
+              </div>
+
+              {/* Diagnosis */}
+              <div>
+                <h4 className="font-semibold text-gray-700 mb-2">Diagnosis</h4>
+                <p className="text-gray-600 bg-gray-50 p-3 rounded-lg">{selectedPrescription.diagnosis}</p>
+              </div>
+
+              {/* Medications */}
+              <div>
+                <h4 className="font-semibold text-gray-700 mb-3 flex items-center gap-2">
+                  <Pill className="w-4 h-4 text-medical-medium" />
+                  Prescribed Medications ({selectedPrescription.medications.length})
+                </h4>
+                <div className="space-y-3">
+                  {selectedPrescription.medications.map((medication, index) => (
+                    <div key={index} className="bg-white border border-gray-200 rounded-lg p-4">
+                      <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+                        <div>
+                          <span className="font-medium text-gray-700">{medication.name}</span>
+                        </div>
+                        <div className="text-gray-600">
+                          <span className="font-medium">Dosage:</span> {medication.dosage}
+                        </div>
+                        <div className="text-gray-600">
+                          <span className="font-medium">Frequency:</span> {medication.frequency}
+                        </div>
+                        <div className="text-gray-600">
+                          <span className="font-medium">Duration:</span> {medication.duration}
+                        </div>
+                      </div>
+                      {medication.instructions && (
+                        <div className="mt-2 text-sm text-gray-500">
+                          <span className="font-medium">Instructions:</span> {medication.instructions}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Medical Advice */}
+              {selectedPrescription.advice && (
+                <div>
+                  <h4 className="font-semibold text-gray-700 mb-2">Medical Advice</h4>
+                  <p className="text-gray-600 bg-blue-50 p-3 rounded-lg">{selectedPrescription.advice}</p>
+                </div>
+              )}
+
+              {/* Follow-up */}
+              {selectedPrescription.followUpDate && (
+                <div>
+                  <h4 className="font-semibold text-gray-700 mb-2">Follow-up</h4>
+                  <Badge variant="outline" className="text-medical-medium border-medical-medium">
+                    {selectedPrescription.followUpDate}
+                  </Badge>
+                </div>
+              )}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

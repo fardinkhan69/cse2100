@@ -34,6 +34,7 @@ interface DoctorApiResponse {
     rating: number;
     image: string;
     bio: string;
+    email?: string;
     createdAt: string;
     __v: number;
   }>;
@@ -53,6 +54,7 @@ interface SingleDoctorApiResponse {
     rating: number;
     image: string;
     bio: string;
+    email?: string;
     createdAt: string;
     __v: number;
   };
@@ -63,12 +65,93 @@ interface SingleDoctorApiResponse {
  */
 export interface DoctorRegistrationData {
   name: string;
+  email: string;
   specialization: string;
   availableSlots: string[];
   experience: string;
   rating?: number;
   image?: string;
   bio: string;
+}
+
+/**
+ * Appointment interface
+ */
+export interface Appointment {
+  _id: string;
+  doctorId: string;
+  patientName: string;
+  userEmail: string;
+  problemDescription: string;
+  appointmentDate: string;
+  appointmentTime: string;
+  booking: boolean;
+  createdAt: string;
+}
+
+/**
+ * Appointment API Response interface
+ */
+interface AppointmentApiResponse {
+  success: boolean;
+  data: Appointment[];
+}
+
+/**
+ * Prescription interface
+ */
+export interface Medication {
+  name: string;
+  dosage: string;
+  frequency: string;
+  duration: string;
+  instructions?: string;
+}
+
+export interface Prescription {
+  _id: string;
+  appointmentId: string;
+  patientId: string;
+  doctorId: string;
+  patientName: string;
+  doctorName: string;
+  date: string;
+  symptoms: string;
+  diagnosis: string;
+  medications: Medication[];
+  advice?: string;
+  followUpDate?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/**
+ * Prescription API Response interfaces
+ */
+interface PrescriptionApiResponse {
+  success: boolean;
+  data: Prescription[];
+}
+
+interface SinglePrescriptionApiResponse {
+  success: boolean;
+  data: Prescription;
+}
+
+/**
+ * Prescription creation data interface
+ */
+export interface PrescriptionCreateData {
+  appointmentId: string;
+  patientId: string;
+  doctorId: string;
+  patientName: string;
+  doctorName: string;
+  symptoms: string;
+  diagnosis: string;
+  medications: Medication[];
+  advice?: string;
+  followUpDate?: string;
 }
 
 /**
@@ -84,7 +167,8 @@ interface ApiErrorResponse {
  * Transform API doctor data to match our Doctor interface
  */
 const transformDoctorData = (apiDoctor: DoctorApiResponse['data'][0]): Doctor => ({
-  id: apiDoctor._id,
+  _id: apiDoctor._id,
+  id: apiDoctor._id, // Map _id to id for backward compatibility
   name: apiDoctor.name,
   specialization: apiDoctor.specialization,
   availableSlots: apiDoctor.availableSlots,
@@ -92,6 +176,9 @@ const transformDoctorData = (apiDoctor: DoctorApiResponse['data'][0]): Doctor =>
   rating: apiDoctor.rating,
   image: apiDoctor.image,
   bio: apiDoctor.bio,
+  email: (apiDoctor as any).email, // Email field might not be in all responses
+  createdAt: apiDoctor.createdAt,
+  __v: apiDoctor.__v,
 });
 
 /**
@@ -191,6 +278,181 @@ export const fetchDoctorAvailableSlots = async (doctorId: string): Promise<strin
   } catch (error) {
     console.error('Error fetching doctor available slots:', error);
     return [];
+  }
+};
+
+/**
+ * Fetch all appointments from the API
+ * @returns Promise<Appointment[]> - Array of appointments
+ */
+export const fetchAppointments = async (): Promise<Appointment[]> => {
+  try {
+    const response = await api.get<AppointmentApiResponse>('/appointments');
+
+    if (!response.data.success) {
+      throw new Error('Failed to fetch appointments');
+    }
+
+    return response.data.data;
+  } catch (error) {
+    console.error('Error fetching appointments:', error);
+    throw error;
+  }
+};
+
+/**
+ * Fetch appointments by doctor ID
+ * @param doctorId - The ID of the doctor
+ * @returns Promise<Appointment[]> - Array of appointments for the doctor
+ */
+export const fetchAppointmentsByDoctorId = async (doctorId: string): Promise<Appointment[]> => {
+  try {
+    const allAppointments = await fetchAppointments();
+    return allAppointments.filter(appointment => appointment.doctorId === doctorId);
+  } catch (error) {
+    console.error('Error fetching appointments by doctor ID:', error);
+    throw error;
+  }
+};
+
+/**
+ * Update appointment booking status (approve/reject)
+ * @param appointmentId - The ID of the appointment
+ * @param bookingStatus - The new booking status
+ * @returns Promise<Appointment> - The updated appointment
+ */
+export const updateAppointmentBooking = async (appointmentId: string, bookingStatus: boolean): Promise<Appointment> => {
+  try {
+    const response = await api.put<{ success: boolean; data: Appointment }>(`/appointments/${appointmentId}`, {
+      booking: bookingStatus
+    });
+
+    if (!response.data.success) {
+      throw new Error('Failed to update appointment');
+    }
+
+    return response.data.data;
+  } catch (error) {
+    console.error('Error updating appointment:', error);
+
+    if (axios.isAxiosError(error)) {
+      const errorData = error.response?.data as ApiErrorResponse;
+
+      if (errorData?.message) {
+        throw new Error(errorData.message);
+      }
+
+      if (error.response?.status === 404) {
+        throw new Error('Appointment not found.');
+      }
+
+      if (error.response?.status === 500) {
+        throw new Error('Server error. Please try again later.');
+      }
+    }
+
+    throw error;
+  }
+};
+
+/**
+ * Create a new prescription
+ * @param prescriptionData - The prescription data
+ * @returns Promise<Prescription> - The created prescription
+ */
+export const createPrescription = async (prescriptionData: PrescriptionCreateData): Promise<Prescription> => {
+  try {
+    const response = await api.post<SinglePrescriptionApiResponse>('/prescriptions', prescriptionData);
+
+    if (!response.data.success) {
+      throw new Error('Failed to create prescription');
+    }
+
+    return response.data.data;
+  } catch (error) {
+    console.error('Error creating prescription:', error);
+
+    if (axios.isAxiosError(error)) {
+      const errorData = error.response?.data as ApiErrorResponse;
+
+      if (errorData?.message) {
+        throw new Error(errorData.message);
+      }
+
+      if (error.response?.status === 400) {
+        throw new Error('Invalid prescription data. Please check all required fields.');
+      }
+
+      if (error.response?.status === 409) {
+        throw new Error('Prescription already exists for this appointment.');
+      }
+
+      if (error.response?.status === 500) {
+        throw new Error('Server error. Please try again later.');
+      }
+    }
+
+    throw error;
+  }
+};
+
+/**
+ * Fetch prescriptions by patient ID
+ * @param patientId - The patient ID (email)
+ * @returns Promise<Prescription[]> - Array of prescriptions
+ */
+export const fetchPrescriptionsByPatient = async (patientId: string): Promise<Prescription[]> => {
+  try {
+    const response = await api.get<PrescriptionApiResponse>(`/prescriptions/patient/${patientId}`);
+
+    if (!response.data.success) {
+      throw new Error('Failed to fetch prescriptions');
+    }
+
+    return response.data.data;
+  } catch (error) {
+    console.error('Error fetching prescriptions by patient:', error);
+    throw error;
+  }
+};
+
+/**
+ * Fetch prescriptions by doctor ID
+ * @param doctorId - The doctor ID
+ * @returns Promise<Prescription[]> - Array of prescriptions
+ */
+export const fetchPrescriptionsByDoctor = async (doctorId: string): Promise<Prescription[]> => {
+  try {
+    const response = await api.get<PrescriptionApiResponse>(`/prescriptions/doctor/${doctorId}`);
+
+    if (!response.data.success) {
+      throw new Error('Failed to fetch prescriptions');
+    }
+
+    return response.data.data;
+  } catch (error) {
+    console.error('Error fetching prescriptions by doctor:', error);
+    throw error;
+  }
+};
+
+/**
+ * Fetch single prescription by ID
+ * @param prescriptionId - The prescription ID
+ * @returns Promise<Prescription> - The prescription
+ */
+export const fetchPrescriptionById = async (prescriptionId: string): Promise<Prescription> => {
+  try {
+    const response = await api.get<SinglePrescriptionApiResponse>(`/prescriptions/${prescriptionId}`);
+
+    if (!response.data.success) {
+      throw new Error('Failed to fetch prescription');
+    }
+
+    return response.data.data;
+  } catch (error) {
+    console.error('Error fetching prescription by ID:', error);
+    throw error;
   }
 };
 

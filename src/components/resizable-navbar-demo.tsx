@@ -82,45 +82,8 @@ export default function NavbarDemo() {
               Doctors
             </button>
 
-            <button
-              onClick={() => handleAnchorClick("#services")}
-              className="relative px-4 py-2 text-neutral-600 dark:text-neutral-300 hover:text-medical-medium"
-            >
-              Services
-            </button>
+            
 
-            <NavLink
-              to="/dashboard"
-              className={({ isActive }) =>
-                `relative px-4 py-2 text-neutral-600 dark:text-neutral-300 ${
-                  isActive ? 'text-medical-medium font-semibold' : ''
-                }`
-              }
-            >
-              Dashboard
-            </NavLink>
-
-            <NavLink
-              to="/doctor-dashboard-demo"
-              className={({ isActive }) =>
-                `relative px-4 py-2 text-neutral-600 dark:text-neutral-300 ${
-                  isActive ? 'text-medical-medium font-semibold' : ''
-                }`
-              }
-            >
-              Doctor Demo
-            </NavLink>
-
-            <NavLink
-              to="/doctor-registration"
-              className={({ isActive }) =>
-                `relative px-4 py-2 text-neutral-600 dark:text-neutral-300 ${
-                  isActive ? 'text-medical-medium font-semibold' : ''
-                }`
-              }
-            >
-              Doctor Registration
-            </NavLink>
           </div>
 
           {/* Dynamic User/Login Button */}

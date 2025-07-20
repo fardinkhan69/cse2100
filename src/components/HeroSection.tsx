@@ -1,7 +1,7 @@
 
 import { motion } from "motion/react";
-import { Button } from "@/components/ui/button";
-import { Calendar, Heart, Shield, Award, Users, Stethoscope } from "lucide-react";
+import { ShimmerButton } from "@/components/magicui/shimmer-button";
+import { Calendar, Heart, Shield, Award, Users, Stethoscope, FileText } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 const HeroSection = () => {
@@ -127,31 +127,56 @@ const HeroSection = () => {
             whileHover={{ scale: 1.05, y: -3 }}
             whileTap={{ scale: 0.98 }}
           >
-            <Button 
-              size="lg" 
-              className="bg-gradient-to-r from-medical-medium to-medical-dark hover:from-medical-dark hover:to-medical-medium text-white px-10 py-5 text-xl font-bold shadow-2xl hover:shadow-3xl transition-all duration-300 rounded-2xl"
+            <ShimmerButton
+              className="shadow-2xl"
+              shimmerColor="#ffffff"
+              background="linear-gradient(135deg, #2563EB 0%, #1E40AF 100%)"
+              shimmerDuration="2.5s"
               onClick={() => {
                 const doctorsSection = document.getElementById('doctors');
                 doctorsSection?.scrollIntoView({ behavior: 'smooth' });
               }}
             >
-              <Calendar className="mr-3 h-6 w-6" />
-              Book Appointment
-            </Button>
+              <span className="whitespace-pre-wrap text-center text-lg font-bold leading-none tracking-tight text-white lg:text-xl flex items-center gap-3">
+                <Calendar className="h-6 w-6" />
+                Book Appointment
+              </span>
+            </ShimmerButton>
           </motion.div>
 
           <motion.div
             whileHover={{ scale: 1.05, y: -3 }}
             whileTap={{ scale: 0.98 }}
           >
-            <Button 
-              variant="outline"
-              size="lg" 
-              className="border-3 border-medical-medium text-medical-dark hover:bg-medical-medium hover:text-white px-10 py-5 text-xl font-bold transition-all duration-300 rounded-2xl shadow-lg hover:shadow-xl"
+            <ShimmerButton
+              className="shadow-2xl"
+              shimmerColor="#60A5FA"
+              background="linear-gradient(135deg, #E8F4FD 0%, #FDFCF8 100%)"
+              shimmerDuration="3s"
               onClick={() => navigate('/login')}
             >
-              Student Portal
-            </Button>
+              <span className="whitespace-pre-wrap text-center text-lg font-bold leading-none tracking-tight text-medical-dark lg:text-xl">
+                Student Portal
+              </span>
+            </ShimmerButton>
+          </motion.div>
+
+          <motion.div
+            whileHover={{ scale: 1.05, y: -3 }}
+            whileTap={{ scale: 0.98 }}
+          >
+            <ShimmerButton
+              className="shadow-2xl"
+              shimmerColor="#10B981"
+              background="linear-gradient(135deg, #D1FAE5 0%, #FDFCF8 100%)"
+              shimmerDuration="2.8s"
+              onClick={() => navigate('/dashboard')}
+            >
+              <span className="whitespace-pre-wrap text-center text-lg font-bold leading-none tracking-tight text-green-700 lg:text-xl flex items-center gap-3">
+                <FileText className="h-5 w-5" />
+                My Prescriptions
+              </span>
+            </ShimmerButton>
           </motion.div>
         </motion.div>
 

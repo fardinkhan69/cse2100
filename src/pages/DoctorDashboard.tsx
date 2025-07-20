@@ -37,34 +37,36 @@ import {
   Settings,
   LogOut,
   Menu,
-  X
+  X,
+  FileText
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
+import {
+  fetchDoctors,
+  fetchAppointmentsByDoctorId,
+  updateAppointmentBooking,
+  Appointment as ApiAppointment
+} from '@/services/api';
+import PrescriptionModal from '@/components/PrescriptionModal';
 
-// Appointment interface
-interface Appointment {
-  _id: string;
-  doctorId: string;
-  patientName: string;
-  userEmail: string;
-  problemDescription: string;
-  appointmentDate: string;
-  appointmentTime: string;
-  booking: boolean;
-  createdAt: string;
-}
+// Use the API Appointment interface
+type Appointment = ApiAppointment;
 
 // Doctor profile interface
 interface DoctorProfile {
+  _id?: string;
   name: string;
   specialization: string;
   experience: string;
   email: string;
-  phone: string;
+  phone?: string;
   bio: string;
-  qualifications: string;
-  address: string;
+  qualifications?: string;
+  address?: string;
+  rating?: number;
+  image?: string;
+  availableSlots?: string[];
 }
 
 const DoctorDashboard: React.FC = () => {
@@ -73,111 +75,76 @@ const DoctorDashboard: React.FC = () => {
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [doctorProfile, setDoctorProfile] = useState<DoctorProfile>({
-    name: 'Dr. Fatema Tuz Zohora',
-    specialization: 'Gynecology',
-    experience: '11 years',
-    email: 'fatema.zohora@ruet.ac.bd',
-    phone: '+880 1712-345678',
-    bio: 'Highly experienced gynecologist specializing in women\'s reproductive health, prenatal care, and hormonal treatments.',
-    qualifications: 'MBBS, FCPS (Gynecology & Obstetrics)',
-    address: 'RUET Medical Center, Rajshahi University of Engineering & Technology'
+    name: '',
+    specialization: '',
+    experience: '',
+    email: '',
+    bio: '',
   });
   const [searchTerm, setSearchTerm] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingData, setIsLoadingData] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [currentDoctorId, setCurrentDoctorId] = useState<string | null>(null);
+  const [prescriptionModalOpen, setPrescriptionModalOpen] = useState(false);
+  const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
   const { toast } = useToast();
 
-  // Dummy appointment data with varied dates and statuses
-  const dummyAppointments: Appointment[] = [
-    // Future pending appointment
-    {
-      _id: "6877a19ff777de3c095ae1b3",
-      doctorId: "6876a02603173cf72bc07bbd",
-      patientName: "Fardin Khan",
-      userEmail: "fardinofficial69@gmail.com",
-      problemDescription: "Regular checkup and consultation regarding women's health concerns",
-      appointmentDate: "2025-01-25",
-      appointmentTime: "02:00 PM",
-      booking: false,
-      createdAt: "2025-01-15T10:30:23.683Z"
-    },
-    // Future approved appointment
-    {
-      _id: "6877a19ff777de3c095ae1b4",
-      doctorId: "6876a02603173cf72bc07bbd",
-      patientName: "Sarah Ahmed",
-      userEmail: "sarah.ahmed@student.ruet.ac.bd",
-      problemDescription: "Prenatal consultation and routine pregnancy checkup",
-      appointmentDate: "2025-01-24",
-      appointmentTime: "10:30 AM",
-      booking: true,
-      createdAt: "2025-01-14T08:15:12.456Z"
-    },
-    // Today's pending appointment
-    {
-      _id: "6877a19ff777de3c095ae1b8",
-      doctorId: "6876a02603173cf72bc07bbd",
-      patientName: "Amina Rahman",
-      userEmail: "amina.rahman@student.ruet.ac.bd",
-      problemDescription: "Urgent consultation for severe abdominal pain and discomfort",
-      appointmentDate: new Date().toISOString().split('T')[0], // Today's date
-      appointmentTime: "03:00 PM",
-      booking: false,
-      createdAt: "2025-01-19T09:15:30.123Z"
-    },
-    // Today's approved appointment
-    {
-      _id: "6877a19ff777de3c095ae1b9",
-      doctorId: "6876a02603173cf72bc07bbd",
-      patientName: "Zara Sultana",
-      userEmail: "zara.sultana@student.ruet.ac.bd",
-      problemDescription: "Routine checkup and health screening appointment",
-      appointmentDate: new Date().toISOString().split('T')[0], // Today's date
-      appointmentTime: "11:00 AM",
-      booking: true,
-      createdAt: "2025-01-18T14:20:45.789Z"
-    },
-    // Future pending appointment
-    {
-      _id: "6877a19ff777de3c095ae1b6",
-      doctorId: "6876a02603173cf72bc07bbd",
-      patientName: "Nusrat Jahan",
-      userEmail: "nusrat.jahan@student.ruet.ac.bd",
-      problemDescription: "Consultation for irregular menstrual cycle and related symptoms",
-      appointmentDate: "2025-01-26",
-      appointmentTime: "11:00 AM",
-      booking: false,
-      createdAt: "2025-01-16T16:45:18.234Z"
-    },
-    // Past appointment (should appear in Past tab)
-    {
-      _id: "6877a19ff777de3c095ae1b5",
-      doctorId: "6876a02603173cf72bc07bbd",
-      patientName: "Rashida Begum",
-      userEmail: "rashida.begum@student.ruet.ac.bd",
-      problemDescription: "Follow-up appointment for hormonal treatment and medication review",
-      appointmentDate: "2025-01-18",
-      appointmentTime: "04:30 PM",
-      booking: true,
-      createdAt: "2025-01-13T14:22:35.789Z"
-    },
-    // Past appointment (should appear in Past tab)
-    {
-      _id: "6877a19ff777de3c095ae1b7",
-      doctorId: "6876a02603173cf72bc07bbd",
-      patientName: "Fatima Khatun",
-      userEmail: "fatima.khatun@student.ruet.ac.bd",
-      problemDescription: "Post-operative follow-up and recovery assessment",
-      appointmentDate: "2025-01-17",
-      appointmentTime: "09:00 AM",
-      booking: true,
-      createdAt: "2025-01-10T11:30:45.567Z"
-    }
-  ];
-
+  // Fetch doctor data and appointments on component mount
   useEffect(() => {
-    // Initialize with dummy data
-    setAppointments(dummyAppointments);
-  }, []);
+    const fetchDoctorData = async () => {
+      setIsLoadingData(true);
+      setError(null);
+
+      try {
+        // Fetch all doctors to get the first one (in a real app, this would be based on authentication)
+        const doctors = await fetchDoctors();
+
+        if (doctors.length === 0) {
+          throw new Error('No doctors found. Please register as a doctor first.');
+        }
+
+        // Use the first doctor for demo purposes (in real app, this would be the authenticated doctor)
+        const doctor = doctors[0];
+        setCurrentDoctorId(doctor._id);
+
+        // Set doctor profile data
+        setDoctorProfile({
+          _id: doctor._id,
+          name: doctor.name,
+          specialization: doctor.specialization,
+          experience: doctor.experience,
+          email: doctor.email || '', // Use email from API if available
+          bio: doctor.bio,
+          rating: doctor.rating,
+          image: doctor.image,
+          availableSlots: doctor.availableSlots,
+          phone: '+880 1712-345678', // Default phone
+          qualifications: 'MBBS, FCPS', // Default qualifications
+          address: 'RUET Medical Center, Rajshahi University of Engineering & Technology' // Default address
+        });
+
+        // Fetch appointments for this doctor
+        const doctorAppointments = await fetchAppointmentsByDoctorId(doctor._id);
+        setAppointments(doctorAppointments);
+
+      } catch (error) {
+        console.error('Error fetching doctor data:', error);
+        const errorMessage = error instanceof Error ? error.message : 'Failed to load doctor data';
+        setError(errorMessage);
+
+        toast({
+          title: "Error Loading Data",
+          description: errorMessage,
+          variant: "destructive",
+        });
+      } finally {
+        setIsLoadingData(false);
+      }
+    };
+
+    fetchDoctorData();
+  }, [toast]);
 
   // Filter appointments based on date only (not booking status)
   const getUpcomingAppointments = () => {
@@ -220,8 +187,8 @@ const DoctorDashboard: React.FC = () => {
       // Find the appointment being approved for better feedback
       const appointmentToApprove = appointments.find(apt => apt._id === appointmentId);
 
-      // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Update appointment booking status via API
+      await updateAppointmentBooking(appointmentId, true);
 
       // Update the appointment status to approved
       setAppointments(prev =>
@@ -237,14 +204,36 @@ const DoctorDashboard: React.FC = () => {
         description: `${appointmentToApprove?.patientName}'s appointment has been approved and will remain in your upcoming appointments.`,
       });
     } catch (error) {
+      console.error('Error approving appointment:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Failed to approve appointment';
+
       toast({
         title: "Error",
-        description: "Failed to approve appointment. Please try again.",
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
       setIsLoading(false);
     }
+  };
+
+  // Handle prescription modal
+  const handleOpenPrescriptionModal = (appointment: Appointment) => {
+    setSelectedAppointment(appointment);
+    setPrescriptionModalOpen(true);
+  };
+
+  const handleClosePrescriptionModal = () => {
+    setPrescriptionModalOpen(false);
+    setSelectedAppointment(null);
+  };
+
+  const handlePrescriptionSuccess = () => {
+    // Optionally refresh appointments or show success message
+    toast({
+      title: "Success",
+      description: "Prescription created successfully!",
+    });
   };
 
   // Handle profile update
@@ -331,6 +320,40 @@ const DoctorDashboard: React.FC = () => {
 
   const upcomingAppointments = getUpcomingAppointments();
   const pastAppointments = getPastAppointments();
+
+  // Show loading state while fetching data
+  if (isLoadingData) {
+    return (
+      <div className="min-h-screen bg-cream flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-medical-medium border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <h2 className="text-xl font-semibold text-gray-700 mb-2">Loading Doctor Dashboard</h2>
+          <p className="text-gray-500">Fetching your appointments and profile information...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error state if data fetching failed
+  if (error) {
+    return (
+      <div className="min-h-screen bg-cream flex items-center justify-center">
+        <div className="text-center max-w-md mx-auto p-6">
+          <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <AlertCircle className="w-8 h-8 text-red-500" />
+          </div>
+          <h2 className="text-xl font-semibold text-gray-700 mb-2">Error Loading Dashboard</h2>
+          <p className="text-gray-500 mb-4">{error}</p>
+          <Button
+            onClick={() => window.location.reload()}
+            className="bg-medical-medium hover:bg-medical-dark text-white"
+          >
+            Retry
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-cream">
@@ -683,7 +706,7 @@ const DoctorDashboard: React.FC = () => {
                             </div>
 
                             {!appointment.booking && (
-                              <div className="flex justify-end pt-2">
+                              <div className="flex flex-col sm:flex-row gap-3 justify-end pt-2">
                                 <Button
                                   onClick={() => handleApproveAppointment(appointment._id)}
                                   disabled={isLoading}
@@ -707,11 +730,20 @@ const DoctorDashboard: React.FC = () => {
                             )}
 
                             {appointment.booking && (
-                              <div className="flex justify-center pt-2">
+                              <div className="flex flex-col sm:flex-row gap-3 items-center justify-between pt-2">
                                 <div className="text-sm text-green-600 font-medium flex items-center">
                                   <CheckCircle className="w-4 h-4 mr-2" />
                                   <span>Appointment Approved</span>
                                 </div>
+                                <Button
+                                  onClick={() => handleOpenPrescriptionModal(appointment)}
+                                  variant="outline"
+                                  className="border-medical-medium text-medical-medium hover:bg-medical-medium hover:text-white h-11 px-6 text-sm md:text-base"
+                                >
+                                  <FileText className="w-4 h-4 mr-2" />
+                                  <span className="hidden sm:inline">Give Prescription</span>
+                                  <span className="sm:hidden">Prescription</span>
+                                </Button>
                               </div>
                             )}
                           </div>
@@ -1004,6 +1036,17 @@ const DoctorDashboard: React.FC = () => {
           </Tabs>
         </motion.div>
       </div>
+
+      {/* Prescription Modal */}
+      {selectedAppointment && (
+        <PrescriptionModal
+          isOpen={prescriptionModalOpen}
+          onClose={handleClosePrescriptionModal}
+          appointment={selectedAppointment}
+          doctorName={doctorProfile.name}
+          onSuccess={handlePrescriptionSuccess}
+        />
+      )}
     </div>
   );
 };

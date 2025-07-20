@@ -26,6 +26,7 @@ import FooterCTA from "@/components/FooterCTA";
 import AboutSection from "@/components/AboutSection";
 import FacilitiesSection from "@/components/FacilitiesSection";
 import ContactSection from "@/components/ContactSection";
+import Footer from "@/components/Footer";
 import { useQuery } from "@tanstack/react-query";
 import { fetchDoctors } from "@/services/api";
 
@@ -172,8 +173,9 @@ const Index = () => {
       {/* Contact Section */}
       <ContactSection />
 
-      {/* Footer CTA Section */}
-      <FooterCTA />
+      {/* Footer */}
+      <Footer />
+
     </div>
   );
 };

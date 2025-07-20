@@ -29,6 +29,7 @@ import Dashboard from "./pages/Dashboard";
 import DoctorDashboard from "./pages/DoctorDashboard";
 import DoctorDashboardDemo from "./pages/DoctorDashboardDemo";
 import DoctorRegistration from "./pages/DoctorRegistration";
+import PatientDashboard from "./pages/PatientDashboard";
 import BookAppointment from "./pages/BookAppointment";
 import NotFound from "./pages/NotFound";
 import AuthProvider from "./components/AuthProvider";
@@ -87,6 +88,9 @@ const App = () => (
 
             {/* Doctor Registration route - public registration form */}
             <Route path="/doctor-registration" element={<DoctorRegistration />} />
+
+            {/* Patient Dashboard route - view and download prescriptions */}
+            <Route path="/patient-dashboard" element={<PatientDashboard />} />
 
             {/* Protected Individual doctor booking page - uses dynamic parameter */}
             <Route path="/book/:doctorId" element={
