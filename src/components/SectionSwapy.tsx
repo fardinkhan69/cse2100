@@ -1,7 +1,7 @@
 "use client";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useState } from "react";
 import { SlotItemMapArray, utils } from "swapy";
-import { DragHandle, SwapyItem, SwapyLayout, SwapySlot } from "@/components/ui/swapy";
+import { SwapyItem, SwapyLayout, SwapySlot } from "@/components/ui/swapy";
 import { Heart, PlusCircle } from "lucide-react";
 
 export function PatientsServedCard() {
@@ -176,7 +176,7 @@ const initialItems: Item[] = [
 import { motion } from "motion/react";
 
 function SectionSwapy() {
-    const [slotItemMap, setSlotItemMap] = useState<SlotItemMapArray>(
+    const [slotItemMap] = useState<SlotItemMapArray>(
         utils.initSlotItemMap(initialItems, "id")
     );
 

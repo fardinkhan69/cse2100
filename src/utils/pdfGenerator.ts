@@ -59,7 +59,6 @@ export const generatePrescriptionPDF = (prescription: Prescription): void => {
 
   // Color Palette
   const primaryText = '#1e293b';
-  const accentColor = '#0ea5e9';
   const borderColor = '#e2e8f0';
   const backgroundColor = '#f5f5f5';
   const footerText = '#6b7280';
@@ -76,7 +75,6 @@ export const generatePrescriptionPDF = (prescription: Prescription): void => {
   };
 
   const primaryTextRgb = hexToRgb(primaryText);
-  const accentRgb = hexToRgb(accentColor);
   const borderRgb = hexToRgb(borderColor);
   const backgroundRgb = hexToRgb(backgroundColor);
   const footerTextRgb = hexToRgb(footerText);

@@ -137,7 +137,7 @@ const Dashboard = () => {
     if (!user) return;
     const fetchComponent = async () => {
       try {
-        const res = await axios.get(`http://localhost:5000/appointments`, {
+        const res = await axios.get(`https://ruet-medical-server.vercel.app/appointments`, {
           params: { email: user.email }
         });
         const appointments = res.data.data;
@@ -150,7 +150,7 @@ const Dashboard = () => {
         const enrichedAppointments = await Promise.all(
           appointments.map(async (appt) => {
             try {
-              const doctorRes = await axios.get(`http://localhost:5000/doctors/${appt.doctorId}`);
+              const doctorRes = await axios.get(`https://ruet-medical-server.vercel.app/doctors/${appt.doctorId}`);
               return {
                 ...appt,
                 roomNo : Math.floor(Math.random() * (300 - 100 + 1)) + 100,
@@ -222,7 +222,7 @@ const Dashboard = () => {
   const handleCancelAppointment = async(appointmentId: string) => {
     console.log('Cancel appointment:', appointmentId);
     try{
-      const res = await axios.delete(`http://localhost:5000/appointments/${appointmentId}`);
+      const res = await axios.delete(`https://ruet-medical-server.vercel.app/appointments/${appointmentId}`);
       console.log(res);
       const updatedAppointments = upcomingAppointment.filter((appt) => appt._id !== appointmentId);
       setUpcomingAppointment(updatedAppointments);

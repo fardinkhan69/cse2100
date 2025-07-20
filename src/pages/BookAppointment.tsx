@@ -14,7 +14,7 @@
  * - Navigation back to home page
  */
 
-import React from 'react';
+
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -237,7 +237,7 @@ const BookAppointment = () => {
               <div className="space-y-3">
                 <h3 className="font-semibold text-gray-900">Available Time Slots</h3>
                 <div className="grid grid-cols-2 gap-2">
-                  {doctor.availableSlots.map((slot, index) => (
+                  {doctor.availableSlots.map((slot: string, index: number) => (
                     <Badge 
                       key={index}
                       variant="outline" 
