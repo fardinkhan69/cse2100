@@ -29,6 +29,8 @@ import ContactSection from "@/components/ContactSection";
 import Footer from "@/components/Footer";
 import { useQuery } from "@tanstack/react-query";
 import { fetchDoctors } from "@/services/api";
+import SectionSwapy from "@/components/SectionSwapy";
+import MagicBento from "@/components/MagicBento";
 
 
 
@@ -75,10 +77,13 @@ const Index = () => {
       {/* Hero Section */}
       <HeroSection />
 
+      {/* Swapy Section */}
+
+      <SectionSwapy />
 
 
-      {/* Impact Section */}
-      <ImpactSection />
+
+
 
       {/* Doctors Section */}
       <section id="doctors" className="py-24 px-4 bg-gradient-to-br from-cream to-white">
@@ -155,6 +160,13 @@ const Index = () => {
           </div>
         </div>
       </section>
+
+      
+
+      {/* Impact Section */}
+      <ImpactSection />
+
+      
 
       {/* About Section */}
       <AboutSection />

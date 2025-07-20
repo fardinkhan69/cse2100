@@ -82,12 +82,21 @@ export default function NavbarDemo() {
               Doctors
             </button>
 
-            
+            <NavLink
+              to="/dashboard"
+              className={({ isActive }) =>
+                `relative px-4 py-2 text-neutral-600 dark:text-neutral-300 ${
+                  isActive ? 'text-medical-medium font-semibold' : ''
+                }`
+              }
+            >
+              Dashboard
+            </NavLink>
 
           </div>
 
           {/* Dynamic User/Login Button */}
-          <div className="flex items-center gap-4 relative z-[70] pointer-events-auto">
+          <div className="flex items-center gap-4 relative z-[70] pointer-events-auto rounded-full">
             {user ? (
               // User is logged in - show user name linking to dashboard
               <NavLink

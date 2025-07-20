@@ -157,10 +157,10 @@ const Footer: React.FC = () => {
             <span className="text-sm font-semibold text-white">Emergency Hotline:</span>
           </div>
           <a
-            href="tel:999"
+            href="tel:0721-750742-3/111"
             className="text-white font-bold text-xl sm:text-lg hover:text-red-200 transition-colors duration-200"
           >
-            999
+            0721-750742-3/111
           </a>
           <span className="text-white/80 text-xs sm:text-sm">Available 24/7</span>
         </div>
@@ -422,10 +422,10 @@ const Footer: React.FC = () => {
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             <div className="text-center md:text-left">
               <p className="text-white/80 text-sm">
-                © {new Date().getFullYear()} RUET Medical Center. All rights reserved.
+                © {new Date().getFullYear()} Fardin Khan. All rights reserved.
               </p>
               <p className="text-white/60 text-xs mt-1">
-                Developed with ❤️ for the RUET community
+                Developed with ❤️ for the RUET community By Fardin Khan 
               </p>
             </div>
             
