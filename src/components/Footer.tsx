@@ -91,7 +91,7 @@ const Footer: React.FC = () => {
     { name: 'Services', path: '/#services' },
     { name: 'About Us', path: '/#about' },
     { name: 'Contact', path: '/#contact' },
-    { name: 'Book Appointment', path: '/book' }
+    { name: 'Book Appointment', path: '/doctor-dashboard' }
   ];
 
   // Services links
