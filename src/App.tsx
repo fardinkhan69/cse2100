@@ -34,6 +34,7 @@ import BookAppointment from "./pages/BookAppointment";
 import NotFound from "./pages/NotFound";
 import AuthProvider from "./components/AuthProvider";
 import PrivateRoute from "./components/PrivateRoute";
+import AdminRoute from "./components/AdminRoute";
 
 // Create a new QueryClient instance for React Query
 // This handles caching, background updates, and error retries
@@ -57,11 +58,11 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     {/* TooltipProvider: Enables tooltip functionality throughout the app */}
     <TooltipProvider>
-      
+
       {/* Toast notification systems for user feedback */}
       <Toaster />
       <Sonner />
-      
+
       {/* BrowserRouter: Enables client-side routing */}
       <BrowserRouter>
         {/* AuthProvider: Provides authentication context to all routes */}
@@ -81,16 +82,22 @@ const App = () => (
             } />
 
             {/* Doctor Dashboard route - doctor appointment management */}
-            <Route path="/doctor-dashboard" element={<DoctorDashboard />} />
+            <Route path="/doctor-dashboard" element={<PrivateRoute>
 
-            {/* Doctor Dashboard Demo route - public demo without authentication */}
-            <Route path="/doctor-dashboard-demo" element={<DoctorDashboardDemo />} />
+              <AdminRoute>
+                <DoctorDashboard />
+              </AdminRoute>
+
+            </PrivateRoute>} />
+
+
 
             {/* Doctor Registration route - public registration form */}
-            <Route path="/doctor-registration" element={<DoctorRegistration />} />
+            <Route path="/doctor-registration" element={<PrivateRoute>
+              <DoctorRegistration />
+            </PrivateRoute>} />
 
-            {/* Patient Dashboard route - view and download prescriptions */}
-            <Route path="/patient-dashboard" element={<PatientDashboard />} />
+
 
             {/* Protected Individual doctor booking page - uses dynamic parameter */}
             <Route path="/book/:doctorId" element={

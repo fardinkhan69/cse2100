@@ -18,6 +18,18 @@ const api = axios.create({
   },
 });
 
+// Create axios instance with auth token
+const createSecureAxios = () => {
+  const token = localStorage.getItem('access-token');
+  return axios.create({
+    baseURL: API_BASE_URL,
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token && { authorization: `Bearer ${token}` }),
+    },
+  });
+};
+
 // Interfaces
 export interface Appointment {
   _id: string;
@@ -81,7 +93,8 @@ export const getDoctorAppointments = async (doctorId: string): Promise<Appointme
  */
 export const approveAppointment = async (appointmentId: string): Promise<Appointment> => {
   try {
-    const response = await api.put<ApiResponse<Appointment>>(`/appointments/${appointmentId}`, {
+    const axiosSecure = createSecureAxios();
+    const response = await axiosSecure.put<ApiResponse<Appointment>>(`/appointments/${appointmentId}`, {
       booking: true
     });
     
@@ -127,7 +140,8 @@ export const updateDoctorProfile = async (
   profileData: Partial<DoctorProfile>
 ): Promise<DoctorProfile> => {
   try {
-    const response = await api.put<ApiResponse<DoctorProfile>>(`/doctors/${doctorId}`, profileData);
+    const axiosSecure = createSecureAxios();
+    const response = await axiosSecure.put<ApiResponse<DoctorProfile>>(`/doctors/${doctorId}`, profileData);
     
     if (!response.data.success) {
       throw new Error(response.data.message || 'Failed to update doctor profile');
@@ -147,7 +161,8 @@ export const updateDoctorProfile = async (
  */
 export const deleteAppointment = async (appointmentId: string): Promise<void> => {
   try {
-    const response = await api.delete<ApiResponse<any>>(`/appointments/${appointmentId}`);
+    const axiosSecure = createSecureAxios();
+    const response = await axiosSecure.delete<ApiResponse<any>>(`/appointments/${appointmentId}`);
     
     if (!response.data.success) {
       throw new Error(response.data.message || 'Failed to delete appointment');

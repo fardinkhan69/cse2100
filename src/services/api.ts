@@ -20,6 +20,18 @@ const api = axios.create({
   },
 });
 
+// Create axios instance with auth token
+const createSecureAxios = () => {
+  const token = localStorage.getItem('access-token');
+  return axios.create({
+    baseURL: API_BASE_URL,
+    timeout: 10000,
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token && { authorization: `Bearer ${token}` }),
+    },
+  });
+};
 /**
  * API Response interface for doctors data
  */
@@ -187,7 +199,8 @@ const transformDoctorData = (apiDoctor: DoctorApiResponse['data'][0]): Doctor =>
  */
 export const fetchDoctors = async (): Promise<Doctor[]> => {
   try {
-    const response = await api.get<DoctorApiResponse>('/doctors');
+    const axiosSecure = createSecureAxios();
+    const response = await axiosSecure.get<DoctorApiResponse>('/doctors');
     
     if (!response.data.success) {
       throw new Error('Failed to fetch doctors');
@@ -207,7 +220,8 @@ export const fetchDoctors = async (): Promise<Doctor[]> => {
  */
 export const fetchDoctorById = async (doctorId: string): Promise<Doctor | null> => {
   try {
-    const response = await api.get<SingleDoctorApiResponse>(`/doctors/${doctorId}`);
+    const axiosSecure = createSecureAxios();
+    const response = await axiosSecure.get<SingleDoctorApiResponse>(`/doctors/${doctorId}`);
     
     if (!response.data.success) {
       return null;
@@ -231,7 +245,8 @@ export const fetchDoctorById = async (doctorId: string): Promise<Doctor | null> 
  */
 export const createDoctor = async (doctorData: DoctorRegistrationData): Promise<Doctor> => {
   try {
-    const response = await api.post<SingleDoctorApiResponse>('/doctors', doctorData);
+    const axiosSecure = createSecureAxios();
+    const response = await axiosSecure.post<SingleDoctorApiResponse>('/doctors', doctorData);
 
     if (!response.data.success) {
       throw new Error('Failed to create doctor');
@@ -303,7 +318,8 @@ export const fetchDoctorAvailableSlots = async (doctorId: string): Promise<strin
  */
 export const fetchAppointments = async (): Promise<Appointment[]> => {
   try {
-    const response = await api.get<AppointmentApiResponse>('/appointments');
+    const axiosSecure = createSecureAxios();
+    const response = await axiosSecure.get<AppointmentApiResponse>('/appointments');
 
     if (!response.data.success) {
       throw new Error('Failed to fetch appointments');
@@ -339,7 +355,8 @@ export const fetchAppointmentsByDoctorId = async (doctorId: string): Promise<App
  */
 export const updateAppointmentBooking = async (appointmentId: string, bookingStatus: boolean): Promise<Appointment> => {
   try {
-    const response = await api.put<{ success: boolean; data: Appointment }>(`/appointments/${appointmentId}`, {
+    const axiosSecure = createSecureAxios();
+    const response = await axiosSecure.put<{ success: boolean; data: Appointment }>(`/appointments/${appointmentId}`, {
       booking: bookingStatus
     });
 
@@ -378,7 +395,8 @@ export const updateAppointmentBooking = async (appointmentId: string, bookingSta
  */
 export const createPrescription = async (prescriptionData: PrescriptionCreateData): Promise<Prescription> => {
   try {
-    const response = await api.post<SinglePrescriptionApiResponse>('/prescriptions', prescriptionData);
+    const axiosSecure = createSecureAxios();
+    const response = await axiosSecure.post<SinglePrescriptionApiResponse>('/prescriptions', prescriptionData);
 
     if (!response.data.success) {
       throw new Error('Failed to create prescription');
@@ -419,7 +437,8 @@ export const createPrescription = async (prescriptionData: PrescriptionCreateDat
  */
 export const fetchPrescriptionsByPatient = async (patientId: string): Promise<Prescription[]> => {
   try {
-    const response = await api.get<PrescriptionApiResponse>(`/prescriptions/patient/${patientId}`);
+    const axiosSecure = createSecureAxios();
+    const response = await axiosSecure.get<PrescriptionApiResponse>(`/prescriptions/patient/${patientId}`);
 
     if (!response.data.success) {
       throw new Error('Failed to fetch prescriptions');
@@ -439,7 +458,8 @@ export const fetchPrescriptionsByPatient = async (patientId: string): Promise<Pr
  */
 export const fetchPrescriptionsByDoctor = async (doctorId: string): Promise<Prescription[]> => {
   try {
-    const response = await api.get<PrescriptionApiResponse>(`/prescriptions/doctor/${doctorId}`);
+    const axiosSecure = createSecureAxios();
+    const response = await axiosSecure.get<PrescriptionApiResponse>(`/prescriptions/doctor/${doctorId}`);
 
     if (!response.data.success) {
       throw new Error('Failed to fetch prescriptions');
@@ -459,7 +479,8 @@ export const fetchPrescriptionsByDoctor = async (doctorId: string): Promise<Pres
  */
 export const fetchPrescriptionById = async (prescriptionId: string): Promise<Prescription> => {
   try {
-    const response = await api.get<SinglePrescriptionApiResponse>(`/prescriptions/${prescriptionId}`);
+    const axiosSecure = createSecureAxios();
+    const response = await axiosSecure.get<SinglePrescriptionApiResponse>(`/prescriptions/${prescriptionId}`);
 
     if (!response.data.success) {
       throw new Error('Failed to fetch prescription');

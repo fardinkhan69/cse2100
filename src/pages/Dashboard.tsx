@@ -50,6 +50,7 @@ import {
 import { fetchPrescriptionsByPatient, type Prescription } from '@/services/api';
 import { generatePrescriptionPDF } from '@/utils/pdfGenerator';
 import axios from 'axios';
+import useAxiosSecure from '@/hooks/useAxiosSecure';
 
 // Mock data for appointments and user info
 const upcomingAppointments = [
@@ -121,6 +122,7 @@ const Dashboard = () => {
   const [prescriptionModalOpen, setPrescriptionModalOpen] = useState(false);
   const [loadingPrescriptions, setLoadingPrescriptions] = useState<{[key: string]: boolean}>({});
   const [isLoadingAppointments, setIsLoadingAppointments] = useState(true);
+  const axiosSecure = useAxiosSecure();
 
   // Get user display information from Firebase user object
   const getUserDisplayInfo = () => {
@@ -141,7 +143,7 @@ const Dashboard = () => {
     const fetchComponent = async () => {
       setIsLoadingAppointments(true);
       try {
-        const res = await axios.get(`http://localhost:5000/appointments`, {
+        const res = await axiosSecure.get(`/appointments`, {
           params: { email: user.email }
         });
         const appointments = res.data.data;
@@ -154,7 +156,7 @@ const Dashboard = () => {
         const enrichedAppointments = await Promise.all(
           appointments.map(async (appt) => {
             try {
-              const doctorRes = await axios.get(`http://localhost:5000/doctors/${appt.doctorId}`);
+              const doctorRes = await axiosSecure.get(`/doctors/${appt.doctorId}`);
               return {
                 ...appt,
                 roomNo : Math.floor(Math.random() * (300 - 100 + 1)) + 100,
@@ -228,7 +230,7 @@ const Dashboard = () => {
   const handleCancelAppointment = async(appointmentId: string) => {
     console.log('Cancel appointment:', appointmentId);
     try{
-      const res = await axios.delete(`http://localhost:5000/appointments/${appointmentId}`);
+      const res = await axiosSecure.delete(`/appointments/${appointmentId}`);
       console.log(res);
       const updatedAppointments = upcomingAppointment.filter((appt) => appt._id !== appointmentId);
       setUpcomingAppointment(updatedAppointments);
