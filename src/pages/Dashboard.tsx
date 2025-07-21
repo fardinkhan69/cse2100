@@ -34,7 +34,8 @@ import {
   Download,
   Pill,
   Stethoscope,
-  Eye
+  Eye,
+  Loader2
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '@/components/AuthProvider';
@@ -119,6 +120,7 @@ const Dashboard = () => {
   const [selectedPrescription, setSelectedPrescription] = useState<Prescription | null>(null);
   const [prescriptionModalOpen, setPrescriptionModalOpen] = useState(false);
   const [loadingPrescriptions, setLoadingPrescriptions] = useState<{[key: string]: boolean}>({});
+  const [isLoadingAppointments, setIsLoadingAppointments] = useState(true);
 
   // Get user display information from Firebase user object
   const getUserDisplayInfo = () => {
@@ -135,9 +137,11 @@ const Dashboard = () => {
 
   useEffect(() => {
     if (!user) return;
+    
     const fetchComponent = async () => {
+      setIsLoadingAppointments(true);
       try {
-        const res = await axios.get(`https://ruet-medical-server.vercel.app/appointments`, {
+        const res = await axios.get(`http://localhost:5000/appointments`, {
           params: { email: user.email }
         });
         const appointments = res.data.data;
@@ -150,7 +154,7 @@ const Dashboard = () => {
         const enrichedAppointments = await Promise.all(
           appointments.map(async (appt) => {
             try {
-              const doctorRes = await axios.get(`https://ruet-medical-server.vercel.app/doctors/${appt.doctorId}`);
+              const doctorRes = await axios.get(`http://localhost:5000/doctors/${appt.doctorId}`);
               return {
                 ...appt,
                 roomNo : Math.floor(Math.random() * (300 - 100 + 1)) + 100,
@@ -190,6 +194,8 @@ const Dashboard = () => {
         }
       } catch (err) {
         console.log(err);
+      } finally {
+        setIsLoadingAppointments(false);
       }
     }
     fetchComponent();
@@ -222,7 +228,7 @@ const Dashboard = () => {
   const handleCancelAppointment = async(appointmentId: string) => {
     console.log('Cancel appointment:', appointmentId);
     try{
-      const res = await axios.delete(`https://ruet-medical-server.vercel.app/appointments/${appointmentId}`);
+      const res = await axios.delete(`http://localhost:5000/appointments/${appointmentId}`);
       console.log(res);
       const updatedAppointments = upcomingAppointment.filter((appt) => appt._id !== appointmentId);
       setUpcomingAppointment(updatedAppointments);
@@ -370,7 +376,44 @@ const Dashboard = () => {
               </div>
 
               <div className="grid gap-6">
-                {upcomingAppointment.map((appointment, index) => (
+                {isLoadingAppointments ? (
+                  // Loading state
+                  <div className="flex flex-col items-center justify-center py-12">
+                    <motion.div
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ duration: 0.5 }}
+                      className="flex flex-col items-center gap-4"
+                    >
+                      <div className="relative">
+                        <div className="w-16 h-16 border-4 border-medical-light rounded-full"></div>
+                        <div className="absolute top-0 left-0 w-16 h-16 border-4 border-medical-medium border-t-transparent rounded-full animate-spin"></div>
+                      </div>
+                      <p className="text-gray-600 font-medium">Loading your appointments...</p>
+                      <p className="text-sm text-gray-500">Please wait while we fetch your data</p>
+                    </motion.div>
+                  </div>
+                ) : upcomingAppointment.length === 0 ? (
+                  // Empty state
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5 }}
+                    className="text-center py-12"
+                  >
+                    <Calendar className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                    <h3 className="text-lg font-medium text-gray-800 mb-2">No Upcoming Appointments</h3>
+                    <p className="text-gray-600 mb-6">You don't have any upcoming appointments scheduled.</p>
+                    <Button
+                      onClick={() => navigate('/')}
+                      className="bg-medical-medium hover:bg-medical-dark"
+                    >
+                      <Calendar className="w-4 h-4 mr-2" />
+                      Book Your First Appointment
+                    </Button>
+                  </motion.div>
+                ) : (
+                  upcomingAppointment.map((appointment, index) => (
                   <motion.div
                     key={appointment.id}
                     initial={{ opacity: 0, x: -20 }}
@@ -450,7 +493,8 @@ const Dashboard = () => {
                       </CardContent>
                     </Card>
                   </motion.div>
-                ))}
+                  ))
+                )}
               </div>
             </TabsContent>
 
@@ -459,7 +503,37 @@ const Dashboard = () => {
               <h2 className="text-2xl font-bold text-gray-800">Previous Appointments</h2>
 
               <div className="grid gap-6">
-                {previousAppointment.map((appointment, index) => (
+                {isLoadingAppointments ? (
+                  // Loading state
+                  <div className="flex flex-col items-center justify-center py-12">
+                    <motion.div
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ duration: 0.5 }}
+                      className="flex flex-col items-center gap-4"
+                    >
+                      <div className="relative">
+                        <div className="w-16 h-16 border-4 border-medical-light rounded-full"></div>
+                        <div className="absolute top-0 left-0 w-16 h-16 border-4 border-medical-medium border-t-transparent rounded-full animate-spin"></div>
+                      </div>
+                      <p className="text-gray-600 font-medium">Loading your appointment history...</p>
+                      <p className="text-sm text-gray-500">Please wait while we fetch your data</p>
+                    </motion.div>
+                  </div>
+                ) : previousAppointment.length === 0 ? (
+                  // Empty state
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5 }}
+                    className="text-center py-12"
+                  >
+                    <FileText className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                    <h3 className="text-lg font-medium text-gray-800 mb-2">No Previous Appointments</h3>
+                    <p className="text-gray-600 mb-6">You haven't completed any appointments yet.</p>
+                  </motion.div>
+                ) : (
+                  previousAppointment.map((appointment, index) => (
                   <motion.div
                     key={appointment.id}
                     initial={{ opacity: 0, x: -20 }}
@@ -546,7 +620,8 @@ const Dashboard = () => {
                       </CardContent>
                     </Card>
                   </motion.div>
-                ))}
+                  ))
+                )}
               </div>
             </TabsContent>
 
