@@ -101,7 +101,7 @@ const AppointmentForm: React.FC<AppointmentFormProps> = ({ doctor }) => {
       console.log('Booking appointment with data:', appointmentData);
 
       // Make API call to create appointment
-      const response = await fetch('http://localhost:5000/appointments', {
+      const response = await fetch('https://ruet-medical-server.vercel.app/appointments', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

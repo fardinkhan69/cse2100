@@ -51,6 +51,7 @@ import {
 } from '@/services/api';
 import PrescriptionModal from '@/components/PrescriptionModal';
 import { AuthContext } from '@/components/AuthProvider';
+import useAxiosSecure from '@/hooks/useAxiosSecure';
 
 // Use the API Appointment interface
 type Appointment = ApiAppointment;
@@ -92,6 +93,7 @@ const DoctorDashboard: React.FC = () => {
   const [prescriptionModalOpen, setPrescriptionModalOpen] = useState(false);
   const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
   const { toast } = useToast();
+  const axiosSecure = useAxiosSecure()
 
   // Redirect to login if user is not authenticated
   useEffect(() => {
