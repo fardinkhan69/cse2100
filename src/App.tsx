@@ -35,6 +35,7 @@ import NotFound from "./pages/NotFound";
 import AuthProvider from "./components/AuthProvider";
 import PrivateRoute from "./components/PrivateRoute";
 import AdminRoute from "./components/AdminRoute";
+import AuthDebugger from "./components/AuthDebugger";
 
 // Create a new QueryClient instance for React Query
 // This handles caching, background updates, and error retries
@@ -67,6 +68,7 @@ const App = () => (
       <BrowserRouter>
         {/* AuthProvider: Provides authentication context to all routes */}
         <AuthProvider>
+          <AuthDebugger />
           <Routes>
             {/* Home page route - displays all doctors */}
             <Route path="/" element={<Index />} />

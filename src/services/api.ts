@@ -2,14 +2,14 @@
  * API Service for Doctor Appointment System
  * 
  * This file contains all API-related functions for fetching data from the backend
- * Base URL: https://ruet-medical-server.vercel.app
+ * Base URL: http://localhost:5000
  */
 
 import axios from 'axios';
 import { Doctor } from '@/data/doctors';
 
 // Base API URL - in production this would come from environment variables
-const API_BASE_URL = 'https://ruet-medical-server.vercel.app';
+const API_BASE_URL = 'http://localhost:5000';
 
 // Create axios instance with base configuration
 const api = axios.create({

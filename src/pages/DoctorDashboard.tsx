@@ -74,7 +74,7 @@ interface DoctorProfile {
 
 const DoctorDashboard: React.FC = () => {
   const navigate = useNavigate();
-  const { user, signOutUser, isLoading: authLoading } = useContext(AuthContext);
+  const { user, signOutUser, isLoading: authLoading, tokenReady } = useContext(AuthContext);
   const [activeTab, setActiveTab] = useState('upcoming');
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -113,6 +113,9 @@ const DoctorDashboard: React.FC = () => {
 
   // Fetch doctor data and appointments on component mount
   useEffect(() => {
+    // Don't make API calls if no user, auth loading, or token not ready
+    if (!user || authLoading || !tokenReady) return;
+    
     const fetchDoctorData = async () => {
       setIsLoadingData(true);
       setError(null);
@@ -168,7 +171,7 @@ const DoctorDashboard: React.FC = () => {
     };
 
     fetchDoctorData();
-  }, [toast, user]);
+  }, [toast, user, authLoading, tokenReady]);
 
   // Filter appointments based on date only (not booking status)
   const getUpcomingAppointments = () => {

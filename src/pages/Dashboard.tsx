@@ -101,7 +101,7 @@ const previousAppointments = [
 
 const Dashboard = () => {
   const navigate = useNavigate();
-  const { user, signOutUser } = useContext(AuthContext);
+  const { user, signOutUser, isLoading, tokenReady } = useContext(AuthContext);
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState('upcoming');
   const [userInfo, setUserInfo] = useState({
@@ -138,7 +138,8 @@ const Dashboard = () => {
   
 
   useEffect(() => {
-    if (!user) return;
+    // Don't make API calls if no user, still loading auth, or token not ready
+    if (!user || isLoading || !tokenReady) return;
     
     const fetchComponent = async () => {
       setIsLoadingAppointments(true);
@@ -202,7 +203,7 @@ const Dashboard = () => {
     }
     fetchComponent();
     
-  }, []);
+  }, [user, isLoading, tokenReady]);
   
 
   const handleLogout = async () => {
