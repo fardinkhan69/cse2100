@@ -360,15 +360,15 @@ const Dashboard = () => {
 
             {/* Tab Navigation */}
             <TabsList className="grid grid-cols-3 w-full max-w-md mx-auto h-12 bg-gray-100">
-              <TabsTrigger value="upcoming" className="font-medium">Upcoming</TabsTrigger>
+              <TabsTrigger value="appointments" className="font-medium">appointments</TabsTrigger>
               <TabsTrigger value="previous" className="font-medium">Previous</TabsTrigger>
               <TabsTrigger value="profile" className="font-medium">Profile</TabsTrigger>
             </TabsList>
 
             {/* Upcoming Appointments Tab */}
-            <TabsContent value="upcoming" className="space-y-6">
+            <TabsContent value="appointments" className="space-y-6">
               <div className="flex justify-between items-center">
-                <h2 className="text-2xl font-bold text-gray-800">Upcoming Appointments</h2>
+                <h2 className="text-2xl font-bold text-gray-800"> Appointments</h2>
                 <Button
                   onClick={() => navigate('/')}
                   className="bg-medical-medium hover:bg-medical-dark"
