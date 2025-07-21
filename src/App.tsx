@@ -35,6 +35,7 @@ import NotFound from "./pages/NotFound";
 import AuthProvider from "./components/AuthProvider";
 import PrivateRoute from "./components/PrivateRoute";
 import AdminRoute from "./components/AdminRoute";
+import DoctorRoute from "./components/DoctorRoute";
 import AuthDebugger from "./components/AuthDebugger";
 
 // Create a new QueryClient instance for React Query
@@ -86,9 +87,9 @@ const App = () => (
             {/* Doctor Dashboard route - doctor appointment management */}
             <Route path="/doctor-dashboard" element={<PrivateRoute>
 
-              <AdminRoute>
+              <DoctorRoute>
                 <DoctorDashboard />
-              </AdminRoute>
+              </DoctorRoute>
 
             </PrivateRoute>} />
 
