@@ -103,7 +103,7 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const { user, signOutUser, isLoading, tokenReady } = useContext(AuthContext);
   const { toast } = useToast();
-  const [activeTab, setActiveTab] = useState('upcoming');
+  const [activeTab, setActiveTab] = useState('appointments');
   const [userInfo, setUserInfo] = useState({
     name: user.name,
     studentId: '2020-04-001',
