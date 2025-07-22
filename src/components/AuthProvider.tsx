@@ -43,7 +43,7 @@ const AuthProvider = ({ children }) => {
                 const userInfo = { email: currentUser.email };
                 
                 try {
-                    const res = await axios.post('http://localhost:5000/jwt', userInfo);
+                    const res = await axios.post('https://ruet-medical-server.vercel.app/jwt', userInfo);
                     console.log('JWT response:', res.data);
                     
                     if (res.data.token) {
