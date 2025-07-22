@@ -9,12 +9,15 @@ import {
   MobileNavMenu,
 } from "@/components/ui/resizable-navbar";
 import { useState, useContext } from "react";
-import { NavLink, useLocation } from "react-router-dom";
+import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { AuthContext } from "./AuthProvider";
+import useAdmin from "@/hooks/useAdmin";
 
 export default function NavbarDemo() {
   const location = useLocation();
+  const navigate = useNavigate();
   const { user } = useContext(AuthContext);
+  const [isAdmin, isAdminLoading] = useAdmin();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   // Handle smooth scrolling for anchor links
@@ -42,6 +45,18 @@ export default function NavbarDemo() {
       return user.email.split('@')[0];
     }
     return 'User';
+  };
+
+  // Get appropriate dashboard route based on user role
+  const getDashboardRoute = () => {
+    return isAdmin ? '/doctor-dashboard' : '/dashboard';
+  };
+
+  // Handle dashboard navigation
+  const handleDashboardClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    const route = getDashboardRoute();
+    navigate(route);
   };
 
   return (
@@ -83,7 +98,7 @@ export default function NavbarDemo() {
             </button>
 
             <NavLink
-              to="/dashboard"
+              to={getDashboardRoute()}
               className={({ isActive }) =>
                 `relative px-4 py-2 text-neutral-600 dark:text-neutral-300 ${
                   isActive ? 'text-medical-medium font-semibold' : ''
@@ -98,16 +113,15 @@ export default function NavbarDemo() {
           {/* Dynamic User/Login Button */}
           <div className="flex items-center gap-4 relative z-[70] pointer-events-auto rounded-full">
             {user ? (
-              // User is logged in - show user name linking to dashboard
-              <NavLink
-                to="/dashboard"
+              // User is logged in - show user name linking to appropriate dashboard
+              <button
+                onClick={handleDashboardClick}
                 className="relative z-[70] inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 bg-medical-medium text-white hover:bg-medical-dark h-10 px-4 py-2 cursor-pointer pointer-events-auto"
-                onClick={() => {
-                  console.log('User button clicked!');
-                }}
+                title={isAdmin ? "Go to Doctor Dashboard" : "Go to Student Dashboard"}
               >
                 {getUserDisplayName()}
-              </NavLink>
+                {isAdmin && <span className="ml-1 text-xs opacity-80">(Dr)</span>}
+              </button>
             ) : (
               // User is not logged in - show login button
               <NavLink
@@ -178,7 +192,7 @@ export default function NavbarDemo() {
             </button>
 
             <NavLink
-              to="/dashboard"
+              to={getDashboardRoute()}
               onClick={() => setIsMobileMenuOpen(false)}
               className="relative text-neutral-600 dark:text-neutral-300 block py-2"
             >
@@ -203,17 +217,20 @@ export default function NavbarDemo() {
 
             <div className="flex w-full flex-col gap-4 mt-4">
               {user ? (
-                // User is logged in - show user name linking to dashboard
-                <NavLink
-                  to="/dashboard"
+                // User is logged in - show user name linking to appropriate dashboard
+                <button
                   onClick={() => {
-                    console.log('Mobile user button clicked!');
+                    handleDashboardClick;
                     setIsMobileMenuOpen(false);
+                    const route = getDashboardRoute();
+                    navigate(route);
                   }}
                   className="w-full inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 bg-medical-medium text-white hover:bg-medical-dark h-10 px-4 py-2 cursor-pointer pointer-events-auto"
+                  title={isAdmin ? "Go to Doctor Dashboard" : "Go to Student Dashboard"}
                 >
                   {getUserDisplayName()}
-                </NavLink>
+                  {isAdmin && <span className="ml-1 text-xs opacity-80">(Dr)</span>}
+                </button>
               ) : (
                 // User is not logged in - show login button
                 <NavLink

@@ -51,6 +51,7 @@ import { fetchPrescriptionsByPatient, type Prescription } from '@/services/api';
 import { generatePrescriptionPDF } from '@/utils/pdfGenerator';
 import axios from 'axios';
 import useAxiosSecure from '@/hooks/useAxiosSecure';
+import useAdmin from '@/hooks/useAdmin';
 
 // Mock data for appointments and user info
 const upcomingAppointments = [
@@ -123,6 +124,7 @@ const Dashboard = () => {
   const [loadingPrescriptions, setLoadingPrescriptions] = useState<{[key: string]: boolean}>({});
   const [isLoadingAppointments, setIsLoadingAppointments] = useState(true);
   const axiosSecure = useAxiosSecure();
+  const [isAdmin, isAdminLoading] = useAdmin();
 
   // Get user display information from Firebase user object
   const getUserDisplayInfo = () => {
@@ -221,6 +223,15 @@ const Dashboard = () => {
     
   }, [user, isLoading, tokenReady]);
   
+
+  // Handle navigation to appropriate dashboard based on user role
+  const handleProfileNavigation = () => {
+    if (isAdmin) {
+      navigate('/doctor-dashboard');
+    } else {
+      navigate('/dashboard');
+    }
+  };
 
   const handleLogout = async () => {
     try {
@@ -352,9 +363,16 @@ const Dashboard = () => {
             </div>
           </div>
           <div className="flex items-center gap-4">
-            <div className="text-right">
+            <div 
+              className="text-right cursor-pointer hover:opacity-80 transition-opacity" 
+              onClick={handleProfileNavigation}
+              title={isAdmin ? "Go to Doctor Dashboard" : "Stay on Student Dashboard"}
+            >
               <p className="font-semibold text-gray-800">{getUserDisplayInfo().name}</p>
-              <p className="text-sm text-gray-600">{getUserDisplayInfo().email}</p>
+              <p className="text-sm text-gray-600">
+                {getUserDisplayInfo().email}
+                {isAdmin && <span className="ml-2 text-medical-medium font-medium">(Doctor)</span>}
+              </p>
             </div>
             <Button variant="outline" onClick={handleLogout}>
               Logout
