@@ -30,6 +30,7 @@ import { Doctor } from '@/data/doctors';
 import { toast } from '@/hooks/use-toast';
 import { AuthContext } from '@/components/AuthProvider';
 import { useNavigate } from 'react-router-dom';
+import useAxiosSecure from '@/hooks/useAxiosSecure';
 
 // Form validation schema using Zod
 const appointmentSchema = z.object({
@@ -63,6 +64,7 @@ const AppointmentForm: React.FC<AppointmentFormProps> = ({ doctor }) => {
   const [appointmentStatus, setAppointmentStatus] = useState<AppointmentStatus>(AppointmentStatus.IDLE);
 
   const navigate = useNavigate();
+  const axiosSecure = useAxiosSecure();
   
   // React Hook Form setup with Zod validation
   const {
@@ -100,22 +102,10 @@ const AppointmentForm: React.FC<AppointmentFormProps> = ({ doctor }) => {
 
       console.log('Booking appointment with data:', appointmentData);
 
-      // Make API call to create appointment
-      const response = await fetch('https://ruet-medical-server.vercel.app/appointments', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(appointmentData),
-      });
+      // Make API call to create appointment using axiosSecure for authentication
+      const response = await axiosSecure.post('/appointments', appointmentData);
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to book appointment');
-      }
-
-      const result = await response.json();
-      console.log('Appointment booked successfully:', result);
+      console.log('Appointment booked successfully:', response.data);
 
       // Set status to pending (appointment created successfully)
       setAppointmentStatus(AppointmentStatus.PENDING);
@@ -129,14 +119,17 @@ const AppointmentForm: React.FC<AppointmentFormProps> = ({ doctor }) => {
       // Reset form for next booking
       reset();
 
-    } catch (error) {
+    } catch (error: any) {
       console.error('Booking failed:', error);
       setAppointmentStatus(AppointmentStatus.IDLE);
+
+      // Handle axios errors properly
+      const errorMessage = error.response?.data?.message || error.message || "Something went wrong. Please try again.";
 
       // Show error toast
       toast({
         title: "Booking Failed",
-        description: error instanceof Error ? error.message : "Something went wrong. Please try again.",
+        description: errorMessage,
         variant: "destructive",
       });
     }

@@ -133,3 +133,64 @@ All colors MUST be HSL.
 .animate-spin-around {
   animation: spin-around calc(var(--speed) * 2) infinite linear;
 }
+
+/* Mobile-First Responsive Utilities */
+@layer utilities {
+  /* Touch-friendly minimum sizes for mobile */
+  .touch-target {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  /* Mobile-optimized text sizes */
+  .text-mobile-xs { font-size: 0.75rem; line-height: 1rem; }
+  .text-mobile-sm { font-size: 0.875rem; line-height: 1.25rem; }
+  .text-mobile-base { font-size: 1rem; line-height: 1.5rem; }
+  .text-mobile-lg { font-size: 1.125rem; line-height: 1.75rem; }
+
+  /* Mobile-specific spacing */
+  .mobile-padding { padding: 0.75rem; }
+  .mobile-margin { margin: 0.5rem; }
+
+  /* Responsive grid utilities */
+  .grid-mobile-1 { grid-template-columns: repeat(1, minmax(0, 1fr)); }
+  .grid-mobile-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+
+  /* Mobile-friendly card spacing */
+  .card-mobile {
+    padding: 0.75rem;
+    margin-bottom: 0.75rem;
+  }
+
+  /* Responsive button heights */
+  .btn-mobile { height: 2.5rem; }
+  .btn-tablet { height: 2.75rem; }
+  .btn-desktop { height: 3rem; }
+
+  /* Mobile-optimized form inputs */
+  .input-mobile {
+    height: 2.5rem;
+    font-size: 1rem;
+    padding: 0.5rem 0.75rem;
+  }
+
+  /* Responsive text truncation */
+  .truncate-mobile {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 150px;
+  }
+
+  @media (min-width: 640px) {
+    .truncate-mobile {
+      max-width: 200px;
+    }
+  }
+
+  @media (min-width: 768px) {
+    .truncate-mobile {
+      max-width: none;
+    }
+  }
+}
