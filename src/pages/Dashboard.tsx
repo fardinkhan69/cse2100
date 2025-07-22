@@ -144,13 +144,22 @@ const Dashboard = () => {
     const fetchComponent = async () => {
       setIsLoadingAppointments(true);
       try {
+        // First, fetch prescriptions for the user
+        let userPrescriptions: Prescription[] = [];
+        try {
+          userPrescriptions = await fetchPrescriptionsByPatient(user.email);
+          setPrescriptions(userPrescriptions);
+        } catch (error) {
+          console.error('Error fetching prescriptions:', error);
+        }
+
+        // Then fetch appointments
         const res = await axiosSecure.get(`/appointments`, {
           params: { email: user.email }
         });
         const appointments = res.data.data;
         let upcoming = [];
         let previous = [];
-        let newAppointments=[]
 
         const now = new Date();
 
@@ -171,30 +180,37 @@ const Dashboard = () => {
           })
         );
 
-        
-
-
         enrichedAppointments.forEach(appt => {
           const combinedDateTimeStr = `${appt.appointmentDate} ${appt.appointmentTime}`;
           const appointmentDateTime = new Date(combinedDateTimeStr);
+          
+          // Check if appointment has an associated prescription
+          const hasPrescription = userPrescriptions.some(prescription => {
+            let prescriptionAppointmentId: string;
+            
+            if (typeof prescription.appointmentId === 'string') {
+              prescriptionAppointmentId = prescription.appointmentId;
+            } else if (prescription.appointmentId && typeof prescription.appointmentId === 'object' && '_id' in prescription.appointmentId) {
+              prescriptionAppointmentId = (prescription.appointmentId as any)._id;
+            } else {
+              prescriptionAppointmentId = String(prescription.appointmentId);
+            }
+            
+            return prescriptionAppointmentId === appt._id;
+          });
 
-          if (appointmentDateTime > now) {
-            upcoming.push(appt);
-          } else {
+          // If appointment has a prescription, it means doctor has seen the patient
+          // So it should go to previous appointments regardless of date
+          if (hasPrescription || appointmentDateTime <= now) {
             previous.push(appt);
+          } else {
+            upcoming.push(appt);
           }
         });
 
         setUpcomingAppointment(upcoming);
         setPreviousAppointment(previous);
 
-        // Fetch prescriptions for the user
-        try {
-          const userPrescriptions = await fetchPrescriptionsByPatient(user.email);
-          setPrescriptions(userPrescriptions);
-        } catch (error) {
-          console.error('Error fetching prescriptions:', error);
-        }
       } catch (err) {
         console.log(err);
       } finally {
