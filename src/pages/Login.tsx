@@ -220,6 +220,11 @@ const Login = () => {
                 : 'Sign in to your RUET Medical Center account'
               }
             </CardDescription>
+
+            <div className='w-full flex-col justify-center text-center text-xs bg-indigo-900'>
+              <p>Admin Email : admin@gmail.com</p>
+              <p>Password : Admin1234</p>
+            </div>
           </CardHeader>
 
           <CardContent className="p-8">
