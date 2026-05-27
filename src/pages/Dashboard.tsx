@@ -102,13 +102,13 @@ const previousAppointments = [
 
 const Dashboard = () => {
   const navigate = useNavigate();
-  const { user, signOutUser, isLoading, tokenReady } = useContext(AuthContext);
+  const { user, signOutUser, isLoading, tokenReady } = useContext(AuthContext)!;
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState('appointments');
   const [userInfo, setUserInfo] = useState({
-    name: user.name,
+    name: user?.displayName || '',
     studentId: '2020-04-001',
-    email: user.email,
+    email: user?.email || '',
     phone: '+880 1712-345678',
     department: 'Computer Science & Engineering',
     year: '4th Year',
@@ -169,9 +169,12 @@ const Dashboard = () => {
           appointments.map(async (appt) => {
             try {
               const doctorRes = await axiosSecure.get(`/doctors/${appt.doctorId}`);
+              // Deterministic room number based on appointment ID (stable across renders)
+              const hashCode = appt._id.split('').reduce((acc: number, char: string) => acc + char.charCodeAt(0), 0);
+              const roomNo = 100 + (hashCode % 200);
               return {
                 ...appt,
-                roomNo : Math.floor(Math.random() * (300 - 100 + 1)) + 100,
+                roomNo,
                 doctorInfo: doctorRes.data.data
               };
               

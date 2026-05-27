@@ -27,13 +27,15 @@ const Login = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const { user, setUser, createUser, signInUser, signInWithGoogle, isLoading, setIsLoading } = useContext(AuthContext);
+  const { user, setUser, createUser, signInUser, signInWithGoogle, resetPassword, isLoading, setIsLoading } = useContext(AuthContext)!;
   const { toast } = useToast();
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [isCreateAccount, setIsCreateAccount] = useState(false);
+  const [forgotPasswordEmail, setForgotPasswordEmail] = useState('');
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
 
   // Get the intended destination from location state or URL params with validation
   const getValidatedRedirectUrl = () => {
@@ -46,20 +48,18 @@ const Login = () => {
       // Only allow internal URLs (starting with /)
       if (redirectUrl.startsWith('/') && !redirectUrl.startsWith('//')) {
         // Additional validation for known routes
-        const validRoutes = ['/dashboard', '/book/', '/'];
+        const validRoutes = ['/dashboard', '/doctor-dashboard', '/doctor-registration', '/book/', '/'];
         const isValidRoute = validRoutes.some(route =>
           redirectUrl === route || redirectUrl.startsWith(route)
         );
 
         if (isValidRoute) {
-          console.log('Smart redirect: Redirecting to intended destination:', redirectUrl);
           return redirectUrl;
         }
       }
     }
 
     // Default to dashboard if no valid redirect URL
-    console.log('Smart redirect: No valid redirect URL found, defaulting to dashboard');
     return '/dashboard';
   };
 
@@ -142,6 +142,27 @@ const Login = () => {
     }
   };
 
+  const handleForgotPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!forgotPasswordEmail) return;
+    
+    try {
+      await resetPassword(forgotPasswordEmail);
+      toast({
+        title: "Password Reset Email Sent",
+        description: "Check your inbox for instructions to reset your password.",
+      });
+      setShowForgotPassword(false);
+      setForgotPasswordEmail('');
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to send password reset email.",
+        variant: "destructive",
+      });
+    }
+  };
+
   const toggleCreateAccount = () => {
     setIsCreateAccount(!isCreateAccount);
     setEmail('');
@@ -220,11 +241,6 @@ const Login = () => {
                 : 'Sign in to your RUET Medical Center account'
               }
             </CardDescription>
-
-            <div className='w-full flex-col justify-center text-center text-xs bg-indigo-900'>
-              <p>Admin Email : admin@gmail.com</p>
-              <p>Password : Admin1234</p>
-            </div>
           </CardHeader>
 
           <CardContent className="p-8">
@@ -305,6 +321,7 @@ const Login = () => {
                     <button
                       type="button"
                       className="text-sm text-medical-dark hover:text-medical-medium font-medium"
+                      onClick={() => setShowForgotPassword(true)}
                     >
                       Forgot your password?
                     </button>
@@ -371,6 +388,49 @@ const Login = () => {
           </CardContent>
         </Card>
       </motion.div>
+
+      {/* Forgot Password Modal */}
+      {showForgotPassword && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-white rounded-2xl p-8 w-full max-w-sm shadow-2xl"
+          >
+            <h3 className="text-xl font-bold text-gray-900 mb-2">Reset Password</h3>
+            <p className="text-sm text-gray-600 mb-6">
+              Enter your email and we'll send you a link to reset your password.
+            </p>
+            <form onSubmit={handleForgotPassword} className="space-y-4">
+              <div className="relative">
+                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <Input
+                  type="email"
+                  placeholder="Enter your email"
+                  value={forgotPasswordEmail}
+                  onChange={(e) => setForgotPasswordEmail(e.target.value)}
+                  className="pl-10 h-12"
+                  required
+                />
+              </div>
+              <Button
+                type="submit"
+                className="w-full h-12 bg-gradient-to-r from-medical-medium to-medical-dark text-white font-semibold rounded-lg"
+              >
+                Send Reset Link
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full h-12"
+                onClick={() => { setShowForgotPassword(false); setForgotPasswordEmail(''); }}
+              >
+                Cancel
+              </Button>
+            </form>
+          </motion.div>
+        </div>
+      )}
     </div>
   );
 };

@@ -22,7 +22,6 @@ import {
   User, 
   Stethoscope, 
   Clock,
-  Star,
   Image,
   FileText,
   ArrowLeft,
@@ -41,7 +40,6 @@ const doctorSchema = z.object({
   specialization: z.string().min(1, 'Specialization is required'),
   availableSlots: z.array(z.string()).min(1, 'At least one time slot is required'),
   experience: z.string().regex(/^\d+\s+years?$/i, 'Experience must be in format "X years" (e.g., "15 years")'),
-  rating: z.number().min(0, 'Rating must be at least 0').max(5, 'Rating must be at most 5').optional(),
   image: z.string().optional(),
   bio: z.string().min(10, 'Bio must be at least 10 characters').max(500, 'Bio must be at most 500 characters'),
 });
@@ -74,7 +72,6 @@ const DoctorRegistration = () => {
       specialization: '',
       availableSlots: [],
       experience: '',
-      rating: 5.0,
       image: '',
       bio: '',
     }
@@ -151,18 +148,12 @@ const DoctorRegistration = () => {
         specialization: data.specialization,
         availableSlots: data.availableSlots,
         experience: data.experience,
-        rating: data.rating || 5.0,
         image: data.image || '',
         bio: data.bio,
       };
 
-      // Log the data being sent to backend
-      console.log('Sending Doctor Registration Data:', doctorData);
-
       // Make actual API call to create doctor
       const createdDoctor = await createDoctor(doctorData);
-
-      console.log('Doctor Created Successfully:', createdDoctor);
 
       toast({
         title: "Registration Successful! 🎉",
@@ -179,8 +170,6 @@ const DoctorRegistration = () => {
       }, 2000);
 
     } catch (error) {
-      console.error('Doctor Registration Error:', error);
-
       const errorMessage = error instanceof Error
         ? error.message
         : 'There was an error submitting your registration. Please try again.';
@@ -379,35 +368,6 @@ const DoctorRegistration = () => {
               </Button>
             </div>
             <p className="text-xs text-gray-500 mt-1">Format: "HH:MM AM/PM" (e.g., "08:00 AM")</p>
-          </div>
-
-          {/* Rating */}
-          <div>
-            <Label htmlFor="rating" className="text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
-              <Star className="w-4 h-4" />
-              Initial Rating (Optional)
-            </Label>
-            <Controller
-              name="rating"
-              control={control}
-              render={({ field }) => (
-                <Input
-                  id="rating"
-                  type="number"
-                  step="0.1"
-                  min="0"
-                  max="5"
-                  value={field.value || ''}
-                  onChange={(e) => field.onChange(e.target.value ? parseFloat(e.target.value) : undefined)}
-                  placeholder="5.0"
-                  className="h-12 text-base"
-                />
-              )}
-            />
-            {errors.rating && (
-              <p className="text-red-500 text-sm mt-1">{errors.rating.message}</p>
-            )}
-            <p className="text-xs text-gray-500 mt-1">Rating between 0-5 (defaults to 5.0)</p>
           </div>
         </CardContent>
       </Card>

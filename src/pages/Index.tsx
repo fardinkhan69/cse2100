@@ -123,7 +123,7 @@ const Index = () => {
                 <div className="flex flex-col items-center gap-4 text-center">
                   <div className="text-red-500 text-xl">⚠️</div>
                   <p className="text-gray-600">
-                    Failed to load doctors. Please check if the server is running on localhost:5000
+                    Failed to load doctors. Please try again later.
                   </p>
                   <p className="text-sm text-gray-500">
                     Error: {error?.message || 'Unknown error'}

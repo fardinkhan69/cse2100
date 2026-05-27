@@ -90,7 +90,7 @@ const BookAppointment = () => {
                 Error Loading Doctor
               </h2>
               <p className="text-gray-600">
-                Failed to load doctor information. Please check if the server is running.
+                Failed to load doctor information. Please try again later.
               </p>
               <p className="text-sm text-gray-500">
                 Error: {error?.message || 'Unknown error'}
@@ -257,7 +257,7 @@ const BookAppointment = () => {
                 <ul className="text-sm text-blue-800 space-y-1">
                   <li>• Appointments are confirmed within 2 hours</li>
                   <li>• Please arrive 15 minutes early</li>
-                  <li>• Bring your insurance card and ID</li>
+                  <li>• Bring your student ID card</li>
                   <li>• Cancellations allowed up to 24 hours prior</li>
                 </ul>
               </div>
