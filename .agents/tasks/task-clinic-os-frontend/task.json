@@ -1,0 +1,7 @@
+{
+  "task_id": "task-clinic-os-frontend",
+  "task_description": "Transform the existing doctor appointment booking app into a full Clinic OS SaaS application by adding admin dashboard, patient management, appointment calendar, billing, staff management, settings, and notification features - all frontend-only with mock data services.",
+  "status": "in_progress",
+  "feature_order": ["FEAT-001", "FEAT-002"],
+  "blocked_reason": null
+}
