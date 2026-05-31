@@ -270,3 +270,150 @@ export const mockClinicSettings: ClinicSettings = {
     { id: 'svc8', name: 'Dental Cleaning', duration: 30, price: 120 },
   ],
 };
+
+
+// ===== Extended data for modern dashboard, analytics & pharmacy =====
+
+// Sparkline trends for stat cards
+export const patientsSparkline = [
+  { value: 980 }, { value: 1020 }, { value: 1080 }, { value: 1110 }, { value: 1180 }, { value: 1230 }, { value: 1284 },
+];
+export const appointmentsSparkline = [
+  { value: 14 }, { value: 18 }, { value: 16 }, { value: 22 }, { value: 19 }, { value: 21 }, { value: 24 },
+];
+export const revenueSparkline = [
+  { value: 35200 }, { value: 38400 }, { value: 42100 }, { value: 39800 }, { value: 45600 }, { value: 47200 }, { value: 48750 },
+];
+export const doctorsSparkline = [
+  { value: 6 }, { value: 6 }, { value: 7 }, { value: 7 }, { value: 8 }, { value: 8 }, { value: 8 },
+];
+
+// Revenue area chart (richer, with target)
+export const revenueTrendData = [
+  { month: 'Aug', revenue: 35200, target: 40000 },
+  { month: 'Sep', revenue: 38400, target: 40000 },
+  { month: 'Oct', revenue: 42100, target: 42000 },
+  { month: 'Nov', revenue: 39800, target: 44000 },
+  { month: 'Dec', revenue: 45600, target: 46000 },
+  { month: 'Jan', revenue: 48750, target: 48000 },
+];
+
+// Appointment status breakdown (donut)
+export const appointmentStatusData = [
+  { name: 'Completed', value: 142, color: '#10b981' },
+  { name: 'Scheduled', value: 86, color: '#3b82f6' },
+  { name: 'Cancelled', value: 18, color: '#f43f5e' },
+  { name: 'No-show', value: 9, color: '#94a3b8' },
+];
+
+// Patient demographics by age (bar)
+export const demographicsData = [
+  { group: '0-17', male: 42, female: 38 },
+  { group: '18-34', male: 120, female: 145 },
+  { group: '35-50', male: 168, female: 182 },
+  { group: '51-65', male: 134, female: 128 },
+  { group: '65+', male: 88, female: 109 },
+];
+
+// Gender split (donut)
+export const genderSplitData = [
+  { name: 'Female', value: 602, color: '#f472b6' },
+  { name: 'Male', value: 552, color: '#60a5fa' },
+  { name: 'Other', value: 30, color: '#a78bfa' },
+];
+
+// Revenue by service category (bar)
+export const revenueByCategoryData = [
+  { category: 'Consultation', revenue: 18400 },
+  { category: 'Lab Tests', revenue: 9200 },
+  { category: 'Imaging', revenue: 11800 },
+  { category: 'Procedures', revenue: 6100 },
+  { category: 'Pharmacy', revenue: 3250 },
+];
+
+// Payment methods (donut)
+export const paymentMethodData = [
+  { name: 'Card', value: 48, color: '#3b82f6' },
+  { name: 'Cash', value: 22, color: '#10b981' },
+  { name: 'Insurance', value: 24, color: '#8b5cf6' },
+  { name: 'Online', value: 6, color: '#f59e0b' },
+];
+
+// Doctor performance (table/bar)
+export interface DoctorPerformance {
+  id: string;
+  name: string;
+  specialization: string;
+  appointments: number;
+  revenue: number;
+  rating: number;
+  avgMinutes: number;
+}
+export const doctorPerformanceData: DoctorPerformance[] = [
+  { id: 's1', name: 'Dr. Amanda Foster', specialization: 'General Medicine', appointments: 86, revenue: 12900, rating: 4.9, avgMinutes: 22 },
+  { id: 's2', name: 'Dr. Richard Park', specialization: 'Cardiology', appointments: 64, revenue: 16000, rating: 4.8, avgMinutes: 31 },
+  { id: 's3', name: 'Dr. Sarah Mitchell', specialization: 'Pediatrics', appointments: 72, revenue: 9800, rating: 4.7, avgMinutes: 18 },
+  { id: 's4', name: 'Dr. James Cooper', specialization: 'Orthopedics', appointments: 51, revenue: 14200, rating: 4.6, avgMinutes: 27 },
+  { id: 's9', name: 'Dr. Emily Zhao', specialization: 'Dermatology', appointments: 38, revenue: 6840, rating: 4.5, avgMinutes: 20 },
+];
+
+// Weekly appointment activity by hour (heatmap)
+export const heatmapDays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+export const heatmapHours = ['8a', '9a', '10a', '11a', '12p', '1p', '2p', '3p', '4p', '5p'];
+// values 0-5 intensity
+export const heatmapData: number[][] = [
+  [2, 4, 5, 3, 1, 0, 3, 4, 2, 1],
+  [3, 5, 4, 4, 2, 1, 4, 5, 3, 2],
+  [1, 3, 4, 2, 1, 0, 2, 3, 4, 1],
+  [4, 5, 5, 4, 2, 1, 5, 4, 3, 2],
+  [3, 4, 5, 3, 2, 1, 3, 4, 2, 1],
+  [1, 2, 3, 2, 0, 0, 1, 2, 1, 0],
+];
+
+// ===== Pharmacy / Inventory =====
+export interface Medicine {
+  id: string;
+  name: string;
+  genericName: string;
+  category: 'tablet' | 'capsule' | 'syrup' | 'injection' | 'cream' | 'drops';
+  manufacturer: string;
+  batchNumber: string;
+  expiryDate: string;
+  quantity: number;
+  minStockLevel: number;
+  unitPrice: number;
+  status: 'in-stock' | 'low-stock' | 'out-of-stock';
+}
+
+export const mockMedicines: Medicine[] = [
+  { id: 'm1', name: 'Amoxicillin 500mg', genericName: 'Amoxicillin', category: 'capsule', manufacturer: 'PharmaCorp', batchNumber: 'AMX-2401', expiryDate: '2025-08-15', quantity: 420, minStockLevel: 100, unitPrice: 0.85, status: 'in-stock' },
+  { id: 'm2', name: 'Paracetamol 650mg', genericName: 'Acetaminophen', category: 'tablet', manufacturer: 'MediLife', batchNumber: 'PCM-2398', expiryDate: '2026-02-20', quantity: 1200, minStockLevel: 200, unitPrice: 0.12, status: 'in-stock' },
+  { id: 'm3', name: 'Ibuprofen 400mg', genericName: 'Ibuprofen', category: 'tablet', manufacturer: 'HealWell', batchNumber: 'IBU-2375', expiryDate: '2025-05-10', quantity: 78, minStockLevel: 150, unitPrice: 0.20, status: 'low-stock' },
+  { id: 'm4', name: 'Cough Syrup', genericName: 'Dextromethorphan', category: 'syrup', manufacturer: 'PharmaCorp', batchNumber: 'CSY-2310', expiryDate: '2024-12-01', quantity: 0, minStockLevel: 40, unitPrice: 4.50, status: 'out-of-stock' },
+  { id: 'm5', name: 'Insulin Glargine', genericName: 'Insulin', category: 'injection', manufacturer: 'BioGen', batchNumber: 'INS-2402', expiryDate: '2025-03-30', quantity: 64, minStockLevel: 30, unitPrice: 28.00, status: 'in-stock' },
+  { id: 'm6', name: 'Hydrocortisone Cream', genericName: 'Hydrocortisone', category: 'cream', manufacturer: 'DermaCare', batchNumber: 'HYD-2388', expiryDate: '2025-09-12', quantity: 36, minStockLevel: 50, unitPrice: 3.20, status: 'low-stock' },
+  { id: 'm7', name: 'Eye Drops Lubricant', genericName: 'Carboxymethylcellulose', category: 'drops', manufacturer: 'VisionPlus', batchNumber: 'EYE-2391', expiryDate: '2026-01-08', quantity: 210, minStockLevel: 60, unitPrice: 5.75, status: 'in-stock' },
+  { id: 'm8', name: 'Metformin 500mg', genericName: 'Metformin', category: 'tablet', manufacturer: 'MediLife', batchNumber: 'MET-2360', expiryDate: '2025-07-22', quantity: 540, minStockLevel: 120, unitPrice: 0.18, status: 'in-stock' },
+  { id: 'm9', name: 'Azithromycin 250mg', genericName: 'Azithromycin', category: 'tablet', manufacturer: 'HealWell', batchNumber: 'AZI-2405', expiryDate: '2025-04-18', quantity: 92, minStockLevel: 100, unitPrice: 1.10, status: 'low-stock' },
+  { id: 'm10', name: 'Omeprazole 20mg', genericName: 'Omeprazole', category: 'capsule', manufacturer: 'PharmaCorp', batchNumber: 'OMP-2412', expiryDate: '2026-03-25', quantity: 380, minStockLevel: 100, unitPrice: 0.30, status: 'in-stock' },
+  { id: 'm11', name: 'Salbutamol Inhaler', genericName: 'Albuterol', category: 'drops', manufacturer: 'RespiCare', batchNumber: 'SAL-2399', expiryDate: '2025-06-14', quantity: 48, minStockLevel: 25, unitPrice: 12.40, status: 'in-stock' },
+  { id: 'm12', name: 'Diclofenac Gel', genericName: 'Diclofenac', category: 'cream', manufacturer: 'HealWell', batchNumber: 'DIC-2384', expiryDate: '2024-11-30', quantity: 0, minStockLevel: 35, unitPrice: 6.10, status: 'out-of-stock' },
+];
+
+export interface PharmacyStats {
+  totalItems: number;
+  inventoryValue: number;
+  lowStockCount: number;
+  expiringSoonCount: number;
+}
+export const mockPharmacyStats: PharmacyStats = {
+  totalItems: mockMedicines.length,
+  inventoryValue: mockMedicines.reduce((sum, m) => sum + m.quantity * m.unitPrice, 0),
+  lowStockCount: mockMedicines.filter((m) => m.status === 'low-stock').length,
+  expiringSoonCount: 3,
+};
+
+// Today's schedule for dashboard
+export const todaySchedule = mockAppointments
+  .filter((a) => a.date === '2024-01-15')
+  .map((a) => ({ id: a.id, time: a.time, patient: a.patientName, doctor: a.doctorName, type: a.type, status: a.status }));

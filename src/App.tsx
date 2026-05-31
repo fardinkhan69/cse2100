@@ -38,6 +38,7 @@ import AdminRoute from "./components/AdminRoute";
 import DoctorRoute from "./components/DoctorRoute";
 import AuthDebugger from "./components/AuthDebugger";
 import { NotificationProvider } from "./contexts/NotificationContext";
+import { ThemeProvider } from "./contexts/ThemeContext";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import PatientList from "./pages/admin/PatientList";
 import PatientDetail from "./pages/admin/PatientDetail";
@@ -47,6 +48,8 @@ import CreateInvoice from "./pages/admin/CreateInvoice";
 import StaffPage from "./pages/admin/StaffPage";
 import SettingsPage from "./pages/admin/SettingsPage";
 import NotificationsPage from "./pages/admin/NotificationsPage";
+import AnalyticsPage from "./pages/admin/AnalyticsPage";
+import PharmacyPage from "./pages/admin/PharmacyPage";
 
 // Create a new QueryClient instance for React Query
 // This handles caching, background updates, and error retries
@@ -79,6 +82,7 @@ const App = () => (
       <BrowserRouter>
         {/* AuthProvider: Provides authentication context to all routes */}
         <AuthProvider>
+          <ThemeProvider>
           <NotificationProvider>
           <AuthDebugger />
           <Routes>
@@ -156,6 +160,16 @@ const App = () => (
                 <StaffPage />
               </AdminRoute>
             } />
+            <Route path="/admin/analytics" element={
+              <AdminRoute>
+                <AnalyticsPage />
+              </AdminRoute>
+            } />
+            <Route path="/admin/pharmacy" element={
+              <AdminRoute>
+                <PharmacyPage />
+              </AdminRoute>
+            } />
             <Route path="/admin/settings" element={
               <AdminRoute>
                 <SettingsPage />
@@ -171,6 +185,7 @@ const App = () => (
             <Route path="*" element={<NotFound />} />
           </Routes>
           </NotificationProvider>
+          </ThemeProvider>
         </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>

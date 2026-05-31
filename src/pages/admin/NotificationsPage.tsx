@@ -1,18 +1,22 @@
 import { useState } from 'react';
+import { motion } from 'motion/react';
 import DashboardLayout from '@/components/DashboardLayout';
+import PageHeader from '@/components/admin/PageHeader';
+import EmptyState from '@/components/admin/EmptyState';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { cn } from '@/lib/utils';
 import { Bell, Calendar, Receipt, User, CheckCheck } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { useNotifications } from '@/contexts/NotificationContext';
 import type { Notification } from '@/services/mockData';
 
-const typeIcons: Record<string, typeof Bell> = {
-  appointment: Calendar,
-  billing: Receipt,
-  system: Bell,
-  patient: User,
+const typeConfig: Record<string, { icon: typeof Bell; color: string }> = {
+  appointment: { icon: Calendar, color: 'bg-blue-500/10 text-blue-600 dark:text-blue-400' },
+  billing: { icon: Receipt, color: 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400' },
+  patient: { icon: User, color: 'bg-violet-500/10 text-violet-600 dark:text-violet-400' },
+  system: { icon: Bell, color: 'bg-slate-500/10 text-slate-600 dark:text-slate-400' },
 };
 
 const NotificationsPage = () => {
@@ -27,65 +31,66 @@ const NotificationsPage = () => {
 
   return (
     <DashboardLayout title="Notifications">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-6">
+      <PageHeader
+        title="Notifications"
+        description="Stay on top of clinic activity."
+        icon={<Bell className="h-5 w-5" />}
+        actions={
+          <Button variant="outline" size="sm" className="gap-2" onClick={markAllAsRead} disabled={unreadCount === 0}>
+            <CheckCheck className="h-4 w-4" /> Mark all read
+          </Button>
+        }
+      />
+
+      <div className="mb-4">
         <Tabs value={filter} onValueChange={setFilter}>
-          <TabsList>
+          <TabsList className="bg-muted/60">
             <TabsTrigger value="all">All ({notifications.length})</TabsTrigger>
             <TabsTrigger value="unread">Unread ({unreadCount})</TabsTrigger>
             <TabsTrigger value="read">Read</TabsTrigger>
           </TabsList>
         </Tabs>
-        <Button variant="outline" size="sm" onClick={markAllAsRead} disabled={unreadCount === 0}>
-          <CheckCheck className="w-4 h-4 mr-2" /> Mark All as Read
-        </Button>
       </div>
 
-      {/* Notification List */}
       <div className="space-y-2">
         {filteredNotifications.length > 0 ? (
-          filteredNotifications.map((notification: Notification) => {
-            const Icon = typeIcons[notification.type] || Bell;
+          filteredNotifications.map((notification: Notification, i) => {
+            const config = typeConfig[notification.type] || typeConfig.system;
+            const Icon = config.icon;
             return (
-              <Card
-                key={notification.id}
-                className={`cursor-pointer transition-colors ${!notification.read ? 'border-l-4 border-l-medical-medium bg-medical-medium/5' : ''}`}
-                onClick={() => markAsRead(notification.id)}
-              >
-                <CardContent className="p-4">
-                  <div className="flex items-start gap-3">
-                    {!notification.read && (
-                      <div className="w-2 h-2 rounded-full bg-medical-medium mt-2 flex-shrink-0" />
-                    )}
-                    <div className={`p-2 rounded-lg flex-shrink-0 ${
-                      notification.type === 'appointment' ? 'bg-blue-50 text-blue-600' :
-                      notification.type === 'billing' ? 'bg-green-50 text-green-600' :
-                      notification.type === 'patient' ? 'bg-purple-50 text-purple-600' :
-                      'bg-gray-50 text-gray-600'
-                    }`}>
-                      <Icon className="w-4 h-4" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between">
-                        <h4 className={`text-sm ${!notification.read ? 'font-semibold' : 'font-medium'}`}>
-                          {notification.title}
-                        </h4>
-                        <span className="text-xs text-gray-400 flex-shrink-0 ml-2">
-                          {formatDistanceToNow(new Date(notification.timestamp), { addSuffix: true })}
-                        </span>
+              <motion.div key={notification.id} initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.02 }}>
+                <Card
+                  className={cn(
+                    'cursor-pointer border-border/60 transition-all hover:shadow-md',
+                    !notification.read && 'border-l-4 border-l-primary bg-primary/[0.03]'
+                  )}
+                  onClick={() => markAsRead(notification.id)}
+                >
+                  <CardContent className="p-4">
+                    <div className="flex items-start gap-3">
+                      <div className={cn('flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl', config.color)}>
+                        <Icon className="h-5 w-5" />
                       </div>
-                      <p className="text-sm text-gray-600 mt-0.5">{notification.message}</p>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center justify-between gap-2">
+                          <h4 className={cn('text-sm text-foreground', !notification.read ? 'font-bold' : 'font-medium')}>
+                            {notification.title}
+                          </h4>
+                          <span className="flex-shrink-0 text-xs text-muted-foreground">
+                            {formatDistanceToNow(new Date(notification.timestamp), { addSuffix: true })}
+                          </span>
+                        </div>
+                        <p className="mt-0.5 text-sm text-muted-foreground">{notification.message}</p>
+                      </div>
+                      {!notification.read && <span className="mt-1 h-2 w-2 flex-shrink-0 rounded-full bg-primary" />}
                     </div>
-                  </div>
-                </CardContent>
-              </Card>
+                  </CardContent>
+                </Card>
+              </motion.div>
             );
           })
         ) : (
-          <div className="text-center py-12">
-            <Bell className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-            <p className="text-gray-500">No notifications to show</p>
-          </div>
+          <EmptyState icon={Bell} title="All caught up!" description="No notifications to show." />
         )}
       </div>
     </DashboardLayout>
