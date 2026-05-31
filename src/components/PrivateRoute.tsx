@@ -2,8 +2,14 @@ import React, { useContext } from 'react'
 import { Navigate, useLocation } from 'react-router-dom';
 import { AuthContext } from './AuthProvider';
 
-const PrivateRoute = ({children}) => {
-    const { user, isLoading } = useContext(AuthContext);
+interface PrivateRouteProps {
+    children: React.ReactNode;
+}
+
+const PrivateRoute = ({ children }: PrivateRouteProps) => {
+    const authContext = useContext(AuthContext);
+    if (!authContext) throw new Error('PrivateRoute must be used within AuthProvider');
+    const { user, isLoading } = authContext;
     const location = useLocation();
 
     // Show loading spinner while checking authentication
@@ -17,7 +23,7 @@ const PrivateRoute = ({children}) => {
 
     // If user is authenticated, show the protected content
     if (user) {
-        return children;
+        return <>{children}</>;
     }
 
     // If not authenticated, redirect to login with the intended destination

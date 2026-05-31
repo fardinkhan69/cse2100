@@ -1,7 +1,8 @@
 import axios from "axios";
+import { API_BASE_URL } from "@/config/api";
 
 const axiosPublic = axios.create({
-    baseURL: 'https://ruet-medical-server.vercel.app'
+    baseURL: API_BASE_URL
 })
 
 const useAxiosPublic = () => {

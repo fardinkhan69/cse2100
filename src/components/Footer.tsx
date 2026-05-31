@@ -91,7 +91,7 @@ const Footer: React.FC = () => {
     { name: 'Services', path: '/#services' },
     { name: 'About Us', path: '/#about' },
     { name: 'Contact', path: '/#contact' },
-    { name: 'Book Appointment', path: '/doctor-dashboard' }
+    { name: 'Book Appointment', path: '/#doctors' }
   ];
 
   // Services links
@@ -127,9 +127,9 @@ const Footer: React.FC = () => {
   const handleNewsletterSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (email) {
+      // Newsletter feature is not yet connected to a backend
       setIsSubscribed(true);
       setEmail('');
-      // In a real app, this would send the email to a backend service
       setTimeout(() => setIsSubscribed(false), 3000);
     }
   };
@@ -239,7 +239,7 @@ const Footer: React.FC = () => {
                 animate={{ opacity: 1, y: 0 }}
                 className="text-green-300 text-sm mt-4"
               >
-                ✓ Thank you for subscribing! You'll receive our latest updates.
+                ✓ Thanks! We'll notify you when our newsletter launches.
               </motion.p>
             )}
           </div>

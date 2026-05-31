@@ -14,7 +14,7 @@ const AdminRoute = ({ children }: AdminRouteProps) => {
     if (isLoading || isAdminLoading) {
         return (
             <div className="flex justify-center items-center min-h-screen">
-                <div className="loading loading-spinner loading-lg"></div>
+                <div className="w-8 h-8 border-4 border-medical-medium border-t-transparent rounded-full animate-spin"></div>
             </div>
         );
     }

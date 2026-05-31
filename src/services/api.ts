@@ -7,9 +7,7 @@
 
 import axios from 'axios';
 import { Doctor } from '@/data/doctors';
-
-// Base API URL - in production this would come from environment variables
-const API_BASE_URL = 'https://ruet-medical-server.vercel.app';
+import { API_BASE_URL } from '@/config/api';
 
 // Create axios instance with base configuration
 const api = axios.create({

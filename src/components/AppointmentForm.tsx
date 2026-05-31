@@ -58,7 +58,8 @@ enum AppointmentStatus {
 
 const AppointmentForm: React.FC<AppointmentFormProps> = ({ doctor }) => {
   // Get authenticated user from context
-  const { user } = useContext(AuthContext);
+  const authContext = useContext(AuthContext);
+  const user = authContext?.user;
 
   // State to track appointment booking status
   const [appointmentStatus, setAppointmentStatus] = useState<AppointmentStatus>(AppointmentStatus.IDLE);
@@ -136,24 +137,33 @@ const AppointmentForm: React.FC<AppointmentFormProps> = ({ doctor }) => {
   };
 
   /**
-   * Generate available dates for the next 7 days
-   * In a real app, this would come from the doctor's actual availability
+   * Generate available dates for the next 7 weekdays
+   * Skips weekends (Saturday=6, Sunday=0) for clinic availability
    */
   const getAvailableDates = () => {
     const dates = [];
     const today = new Date();
+    let daysAdded = 0;
+    let offset = 1;
     
-    for (let i = 1; i <= 7; i++) {
+    while (daysAdded < 7) {
       const date = new Date(today);
-      date.setDate(today.getDate() + i);
-      dates.push({
-        value: date.toISOString().split('T')[0], // YYYY-MM-DD format
-        label: date.toLocaleDateString('en-US', { 
-          weekday: 'long', 
-          month: 'long', 
-          day: 'numeric' 
-        })
-      });
+      date.setDate(today.getDate() + offset);
+      const dayOfWeek = date.getDay();
+      
+      // Skip weekends (0 = Sunday, 6 = Saturday)
+      if (dayOfWeek !== 0 && dayOfWeek !== 6) {
+        dates.push({
+          value: date.toISOString().split('T')[0],
+          label: date.toLocaleDateString('en-US', { 
+            weekday: 'long', 
+            month: 'long', 
+            day: 'numeric' 
+          })
+        });
+        daysAdded++;
+      }
+      offset++;
     }
     return dates;
   };
