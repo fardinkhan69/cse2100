@@ -32,7 +32,8 @@ interface DoctorCardProps {
 const DoctorCard: React.FC<DoctorCardProps> = ({ doctor, onBookAppointment }) => {
   // React Router hook for programmatic navigation
   const navigate = useNavigate();
-  const { user } = useContext(AuthContext);
+  const authContext = useContext(AuthContext);
+  const user = authContext?.user;
 
   /**
    * Handle booking button click
@@ -108,7 +109,7 @@ const DoctorCard: React.FC<DoctorCardProps> = ({ doctor, onBookAppointment }) =>
 
         {/* Available time slots */}
         <div>
-          <h4 className="text-sm font-bold text-gray-800 mb-3">Available Today</h4>
+          <h4 className="text-sm font-bold text-gray-800 mb-3">Available Slots</h4>
           <div className="flex flex-wrap gap-2">
             {/* Show first 3 available slots */}
             {doctor.availableSlots.slice(0, 3).map((slot, index) => (

@@ -1,16 +1,32 @@
-import { createUserWithEmailAndPassword, onAuthStateChanged, signInWithEmailAndPassword, signInWithPopup, signOut } from 'firebase/auth';
+import { createUserWithEmailAndPassword, onAuthStateChanged, signInWithEmailAndPassword, signInWithPopup, signOut, User, UserCredential, sendPasswordResetEmail } from 'firebase/auth';
 import React, { createContext, useEffect, useState } from 'react'
 import { auth, googleProvider } from '@/firebase/firebase.init';
 import axios from 'axios';
+import { API_BASE_URL } from '@/config/api';
 
-export const AuthContext = createContext(null);
+/**
+ * AuthContext type definition for type safety across the app
+ */
+export interface AuthContextValue {
+    user: User | null;
+    setUser: React.Dispatch<React.SetStateAction<User | null>>;
+    createUser: (email: string, password: string) => Promise<UserCredential>;
+    signInUser: (email: string, password: string) => Promise<UserCredential>;
+    signInWithGoogle: () => Promise<UserCredential>;
+    signOutUser: () => Promise<void>;
+    resetPassword: (email: string) => Promise<void>;
+    isLoading: boolean;
+    setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
+    tokenReady: boolean;
+}
 
-const AuthProvider = ({ children }) => {
-    const [user, setUser] = useState(null)
-    const [isLoading, setIsLoading] = useState(true); // Start with true until auth state is determined
-    const [tokenReady, setTokenReady] = useState(false); // Track if token is ready
+export const AuthContext = createContext<AuthContextValue | null>(null);
 
-    // Simple wrapper functions that only return Firebase auth functions
+const AuthProvider = ({ children }: { children: React.ReactNode }) => {
+    const [user, setUser] = useState<User | null>(null)
+    const [isLoading, setIsLoading] = useState(true);
+    const [tokenReady, setTokenReady] = useState(false);
+
     const createUser = async (email: string, password: string) => {
         setIsLoading(true);
         return await createUserWithEmailAndPassword(auth, email, password);
@@ -26,51 +42,45 @@ const AuthProvider = ({ children }) => {
         return await signInWithPopup(auth, googleProvider);
     }
 
-    const signOutUser = () => {
+    const signOutUser = async () => {
         setIsLoading(true);
         setTokenReady(false);
-        return signOut(auth);
+        await signOut(auth);
+    }
+
+    const resetPassword = async (email: string) => {
+        await sendPasswordResetEmail(auth, email);
     }
 
     useEffect(() => {
         const unSubscribe = onAuthStateChanged(auth, async (currentUser) => {
-            console.log('Auth state changed:', currentUser?.email || 'No user');
             setUser(currentUser);
             
             if (currentUser) {
-                // Keep loading true while getting JWT token
-                console.log('Getting JWT token for user:', currentUser.email);
-                const userInfo = { email: currentUser.email };
-                
+                // Send Firebase ID token (not bare email) for secure JWT exchange
                 try {
-                    const res = await axios.post('https://ruet-medical-server.vercel.app/jwt', userInfo);
-                    console.log('JWT response:', res.data);
+                    const idToken = await currentUser.getIdToken();
+                    const res = await axios.post(`${API_BASE_URL}/jwt`, {
+                        email: currentUser.email,
+                        idToken: idToken,
+                    });
                     
                     if (res.data.token) {
                         localStorage.setItem('access-token', res.data.token);
-                        console.log('Token stored successfully');
-                        setTokenReady(true); // Mark token as ready
-                        
-                        // Small delay to ensure token is fully available
-                        await new Promise(resolve => setTimeout(resolve, 200));
+                        setTokenReady(true);
                     } else {
-                        console.error('No token received from server');
                         setTokenReady(false);
                     }
                 } catch (error) {
-                    console.error('Error getting JWT token:', error);
-                    // If JWT request fails, set tokenReady to true to prevent infinite waiting
-                    // but don't sign out the user - they're still authenticated with Firebase
-                    setTokenReady(true);
+                    // JWT request failed — don't mark token as ready
+                    // User can still navigate public routes; secured API calls will fail gracefully
+                    setTokenReady(false);
                 } finally {
-                    // Always stop loading, regardless of JWT success/failure
                     setIsLoading(false);
                 }
             } else {
-                // User signed out - remove token and stop loading
-                console.log('User signed out, removing token');
                 localStorage.removeItem('access-token');
-                setTokenReady(false); // No token when no user
+                setTokenReady(false);
                 setIsLoading(false);
             }
         });
@@ -80,16 +90,17 @@ const AuthProvider = ({ children }) => {
         }
     }, [])
 
-    const userData = {
+    const userData: AuthContextValue = {
         user,
         setUser,
         createUser,
         signInUser,
         signInWithGoogle,
         signOutUser,
+        resetPassword,
         isLoading,
         setIsLoading,
-        tokenReady, // Add token ready state
+        tokenReady,
     }
 
     return (

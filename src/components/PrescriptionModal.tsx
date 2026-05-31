@@ -134,6 +134,8 @@ const PrescriptionModal: React.FC<PrescriptionModalProps> = ({
     try {
       const prescriptionData: PrescriptionCreateData = {
         appointmentId: appointment._id,
+        // Note: patientId uses email as per backend schema.
+        // A future migration should use a stable UID instead.
         patientId: appointment.userEmail,
         doctorId: appointment.doctorId,
         patientName: appointment.patientName,

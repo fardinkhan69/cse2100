@@ -74,7 +74,7 @@ interface DoctorProfile {
 
 const DoctorDashboard: React.FC = () => {
   const navigate = useNavigate();
-  const { user, signOutUser, isLoading: authLoading, tokenReady } = useContext(AuthContext);
+  const { user, signOutUser, isLoading: authLoading, tokenReady } = useContext(AuthContext)!;
   const [activeTab, setActiveTab] = useState('upcoming');
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -269,8 +269,18 @@ const DoctorDashboard: React.FC = () => {
     setIsLoading(true);
     
     try {
-      // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      if (!currentDoctorId) {
+        throw new Error('Doctor ID not found. Please refresh the page.');
+      }
+
+      // Make actual API call to update doctor profile
+      await axiosSecure.put(`/doctors/${currentDoctorId}`, {
+        name: doctorProfile.name,
+        specialization: doctorProfile.specialization,
+        experience: doctorProfile.experience,
+        bio: doctorProfile.bio,
+        email: doctorProfile.email,
+      });
       
       toast({
         title: "Success",
