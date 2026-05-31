@@ -37,6 +37,7 @@ import PrivateRoute from "./components/PrivateRoute";
 import AdminRoute from "./components/AdminRoute";
 import DoctorRoute from "./components/DoctorRoute";
 import AuthDebugger from "./components/AuthDebugger";
+import { NotificationProvider } from "./contexts/NotificationContext";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import PatientList from "./pages/admin/PatientList";
 import PatientDetail from "./pages/admin/PatientDetail";
@@ -78,6 +79,7 @@ const App = () => (
       <BrowserRouter>
         {/* AuthProvider: Provides authentication context to all routes */}
         <AuthProvider>
+          <NotificationProvider>
           <AuthDebugger />
           <Routes>
             {/* Home page route - displays all doctors */}
@@ -120,54 +122,55 @@ const App = () => (
 
             {/* Admin/Clinic OS Routes */}
             <Route path="/admin" element={
-              <PrivateRoute>
+              <AdminRoute>
                 <AdminDashboard />
-              </PrivateRoute>
+              </AdminRoute>
             } />
             <Route path="/admin/patients" element={
-              <PrivateRoute>
+              <AdminRoute>
                 <PatientList />
-              </PrivateRoute>
+              </AdminRoute>
             } />
             <Route path="/admin/patients/:patientId" element={
-              <PrivateRoute>
+              <AdminRoute>
                 <PatientDetail />
-              </PrivateRoute>
+              </AdminRoute>
             } />
             <Route path="/admin/appointments" element={
-              <PrivateRoute>
+              <AdminRoute>
                 <AppointmentsPage />
-              </PrivateRoute>
+              </AdminRoute>
             } />
             <Route path="/admin/billing" element={
-              <PrivateRoute>
+              <AdminRoute>
                 <BillingPage />
-              </PrivateRoute>
+              </AdminRoute>
             } />
             <Route path="/admin/billing/create" element={
-              <PrivateRoute>
+              <AdminRoute>
                 <CreateInvoice />
-              </PrivateRoute>
+              </AdminRoute>
             } />
             <Route path="/admin/staff" element={
-              <PrivateRoute>
+              <AdminRoute>
                 <StaffPage />
-              </PrivateRoute>
+              </AdminRoute>
             } />
             <Route path="/admin/settings" element={
-              <PrivateRoute>
+              <AdminRoute>
                 <SettingsPage />
-              </PrivateRoute>
+              </AdminRoute>
             } />
             <Route path="/admin/notifications" element={
-              <PrivateRoute>
+              <AdminRoute>
                 <NotificationsPage />
-              </PrivateRoute>
+              </AdminRoute>
             } />
 
             {/* Catch-all route for 404 errors - MUST be last */}
             <Route path="*" element={<NotFound />} />
           </Routes>
+          </NotificationProvider>
         </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>

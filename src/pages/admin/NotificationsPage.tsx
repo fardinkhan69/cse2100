@@ -5,7 +5,8 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Bell, Calendar, Receipt, User, CheckCheck } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
-import { mockNotifications, type Notification } from '@/services/mockData';
+import { useNotifications } from '@/contexts/NotificationContext';
+import type { Notification } from '@/services/mockData';
 
 const typeIcons: Record<string, typeof Bell> = {
   appointment: Calendar,
@@ -15,24 +16,14 @@ const typeIcons: Record<string, typeof Bell> = {
 };
 
 const NotificationsPage = () => {
-  const [notifications, setNotifications] = useState<Notification[]>(mockNotifications);
+  const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications();
   const [filter, setFilter] = useState('all');
 
-  const filteredNotifications = notifications.filter((n) => {
+  const filteredNotifications = notifications.filter((n: Notification) => {
     if (filter === 'unread') return !n.read;
     if (filter === 'read') return n.read;
     return true;
   });
-
-  const markAsRead = (id: string) => {
-    setNotifications(notifications.map((n) => (n.id === id ? { ...n, read: true } : n)));
-  };
-
-  const markAllAsRead = () => {
-    setNotifications(notifications.map((n) => ({ ...n, read: true })));
-  };
-
-  const unreadCount = notifications.filter((n) => !n.read).length;
 
   return (
     <DashboardLayout title="Notifications">
@@ -53,7 +44,7 @@ const NotificationsPage = () => {
       {/* Notification List */}
       <div className="space-y-2">
         {filteredNotifications.length > 0 ? (
-          filteredNotifications.map((notification) => {
+          filteredNotifications.map((notification: Notification) => {
             const Icon = typeIcons[notification.type] || Bell;
             return (
               <Card

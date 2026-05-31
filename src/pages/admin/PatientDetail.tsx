@@ -28,11 +28,29 @@ const PatientDetail = () => {
   const patientAppointments = mockAppointments.filter((a) => a.patientId === patientId);
   const patientInvoices = mockInvoices.filter((inv) => inv.patientId === patientId);
 
+  // Derive pseudo-random vitals from patientId
+  const hashCode = (str: string) => {
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+      const char = str.charCodeAt(i);
+      hash = ((hash << 5) - hash) + char;
+      hash |= 0;
+    }
+    return Math.abs(hash);
+  };
+
+  const seed = hashCode(patient.id);
+  const systolic = 110 + (seed % 30);          // 110-139
+  const diastolic = 65 + ((seed >> 4) % 20);   // 65-84
+  const heartRate = 60 + ((seed >> 8) % 30);   // 60-89
+  const temp = (97.0 + ((seed >> 12) % 20) / 10).toFixed(1); // 97.0-98.9
+  const weight = 130 + ((seed >> 16) % 70);    // 130-199
+
   const vitals = [
-    { label: 'Blood Pressure', value: '120/80 mmHg', icon: Activity, color: 'text-red-500 bg-red-50' },
-    { label: 'Heart Rate', value: '72 bpm', icon: Heart, color: 'text-pink-500 bg-pink-50' },
-    { label: 'Temperature', value: '98.6 F', icon: Thermometer, color: 'text-orange-500 bg-orange-50' },
-    { label: 'Weight', value: '165 lbs', icon: Weight, color: 'text-blue-500 bg-blue-50' },
+    { label: 'Blood Pressure', value: `${systolic}/${diastolic} mmHg`, icon: Activity, color: 'text-red-500 bg-red-50' },
+    { label: 'Heart Rate', value: `${heartRate} bpm`, icon: Heart, color: 'text-pink-500 bg-pink-50' },
+    { label: 'Temperature', value: `${temp} F`, icon: Thermometer, color: 'text-orange-500 bg-orange-50' },
+    { label: 'Weight', value: `${weight} lbs`, icon: Weight, color: 'text-blue-500 bg-blue-50' },
   ];
 
   const medicalHistory = [

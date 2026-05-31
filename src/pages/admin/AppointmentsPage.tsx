@@ -3,7 +3,8 @@ import DashboardLayout from '@/components/DashboardLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Calendar, List, Columns, Plus } from 'lucide-react';
+import { Calendar, List, Columns, Plus, ChevronLeft, ChevronRight } from 'lucide-react';
+import { getDaysInMonth, startOfMonth, getDay, format, addMonths, subMonths } from 'date-fns';
 import { mockAppointments } from '@/services/mockData';
 
 type ViewMode = 'list' | 'calendar' | 'queue';
@@ -19,13 +20,27 @@ const statusColors: Record<string, string> = {
 const AppointmentsPage = () => {
   const [view, setView] = useState<ViewMode>('list');
   const [selectedDate, setSelectedDate] = useState('2024-01-15');
+  const [currentMonth, setCurrentMonth] = useState(new Date(2024, 0, 1)); // January 2024
 
-  const daysInMonth = Array.from({ length: 31 }, (_, i) => i + 1);
+  const daysCount = getDaysInMonth(currentMonth);
+  const firstDayOfMonth = startOfMonth(currentMonth);
+  const startDayOfWeek = getDay(firstDayOfMonth); // 0=Sun, 1=Mon, ...
+  const daysInMonth = Array.from({ length: daysCount }, (_, i) => i + 1);
+  const leadingEmptyCells = Array.from({ length: startDayOfWeek }, (_, i) => i);
+
   const appointmentsForDate = mockAppointments.filter((a) => a.date === selectedDate);
 
   const waitingAppts = mockAppointments.filter((a) => a.status === 'scheduled');
   const inProgressAppts = mockAppointments.filter((a) => a.status === 'in-progress');
   const completedAppts = mockAppointments.filter((a) => a.status === 'completed');
+
+  const handlePrevMonth = () => {
+    setCurrentMonth(subMonths(currentMonth, 1));
+  };
+
+  const handleNextMonth = () => {
+    setCurrentMonth(addMonths(currentMonth, 1));
+  };
 
   return (
     <DashboardLayout title="Appointments">
@@ -113,7 +128,17 @@ const AppointmentsPage = () => {
           <div className="lg:col-span-2">
             <Card>
               <CardHeader>
-                <CardTitle className="text-base">January 2024</CardTitle>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-base">{format(currentMonth, 'MMMM yyyy')}</CardTitle>
+                  <div className="flex items-center gap-1">
+                    <Button variant="ghost" size="icon" onClick={handlePrevMonth}>
+                      <ChevronLeft className="w-4 h-4" />
+                    </Button>
+                    <Button variant="ghost" size="icon" onClick={handleNextMonth}>
+                      <ChevronRight className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </div>
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-7 gap-1 mb-2">
@@ -122,10 +147,12 @@ const AppointmentsPage = () => {
                   ))}
                 </div>
                 <div className="grid grid-cols-7 gap-1">
-                  {/* Empty cells for Jan 2024 starting on Monday */}
-                  <div />
+                  {/* Leading empty cells based on first day of month */}
+                  {leadingEmptyCells.map((i) => (
+                    <div key={`empty-${i}`} />
+                  ))}
                   {daysInMonth.map((day) => {
-                    const dateStr = `2024-01-${String(day).padStart(2, '0')}`;
+                    const dateStr = `${format(currentMonth, 'yyyy-MM')}-${String(day).padStart(2, '0')}`;
                     const hasAppts = mockAppointments.some((a) => a.date === dateStr);
                     const isSelected = dateStr === selectedDate;
                     return (

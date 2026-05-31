@@ -1,6 +1,7 @@
 import { useState, useContext } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { AuthContext } from '@/components/AuthProvider';
+import { useNotifications } from '@/contexts/NotificationContext';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
@@ -26,14 +27,19 @@ import {
   ChevronRight,
   User,
 } from 'lucide-react';
-import { mockNotifications } from '@/services/mockData';
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
   title: string;
 }
 
-const navItems = [
+interface NavItem {
+  label: string;
+  icon: typeof LayoutDashboard;
+  path: string;
+}
+
+const navItems: NavItem[] = [
   { label: 'Dashboard', icon: LayoutDashboard, path: '/admin' },
   { label: 'Patients', icon: Users, path: '/admin/patients' },
   { label: 'Appointments', icon: Calendar, path: '/admin/appointments' },
@@ -42,13 +48,61 @@ const navItems = [
   { label: 'Settings', icon: Settings, path: '/admin/settings' },
 ];
 
+interface SidebarContentProps {
+  mobile?: boolean;
+  collapsed: boolean;
+  navigate: (path: string) => void;
+  isActive: (path: string) => boolean;
+  onToggleCollapse: () => void;
+}
+
+const SidebarContent = ({ mobile = false, collapsed, navigate, isActive, onToggleCollapse }: SidebarContentProps) => (
+  <div className="flex flex-col h-full">
+    <div className="p-4 border-b">
+      <div className="flex items-center gap-2">
+        <div className="w-8 h-8 rounded-lg bg-medical-medium flex items-center justify-center">
+          <span className="text-white font-bold text-sm">C</span>
+        </div>
+        {(!collapsed || mobile) && (
+          <span className="font-semibold text-lg text-medical-dark">Clinic OS</span>
+        )}
+      </div>
+    </div>
+    <nav className="flex-1 p-2 space-y-1">
+      {navItems.map((item) => (
+        <button
+          key={item.path}
+          onClick={() => navigate(item.path)}
+          className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
+            isActive(item.path)
+              ? 'bg-medical-medium/10 text-medical-medium'
+              : 'text-gray-600 hover:bg-gray-100'
+          }`}
+        >
+          <item.icon className="w-5 h-5 flex-shrink-0" />
+          {(!collapsed || mobile) && <span>{item.label}</span>}
+        </button>
+      ))}
+    </nav>
+    {!mobile && (
+      <div className="p-2 border-t">
+        <button
+          onClick={onToggleCollapse}
+          className="w-full flex items-center justify-center p-2 rounded-lg text-gray-500 hover:bg-gray-100"
+        >
+          {collapsed ? <ChevronRight className="w-5 h-5" /> : <ChevronLeft className="w-5 h-5" />}
+        </button>
+      </div>
+    )}
+  </div>
+);
+
 const DashboardLayout = ({ children, title }: DashboardLayoutProps) => {
   const [collapsed, setCollapsed] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
   const { user, signOutUser } = useContext(AuthContext);
-
-  const unreadCount = mockNotifications.filter((n) => !n.read).length;
+  const { unreadCount } = useNotifications();
 
   const isActive = (path: string) => {
     if (path === '/admin') return location.pathname === '/admin';
@@ -60,47 +114,6 @@ const DashboardLayout = ({ children, title }: DashboardLayoutProps) => {
     navigate('/login');
   };
 
-  const SidebarContent = ({ mobile = false }: { mobile?: boolean }) => (
-    <div className="flex flex-col h-full">
-      <div className="p-4 border-b">
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-medical-medium flex items-center justify-center">
-            <span className="text-white font-bold text-sm">C</span>
-          </div>
-          {(!collapsed || mobile) && (
-            <span className="font-semibold text-lg text-medical-dark">Clinic OS</span>
-          )}
-        </div>
-      </div>
-      <nav className="flex-1 p-2 space-y-1">
-        {navItems.map((item) => (
-          <button
-            key={item.path}
-            onClick={() => navigate(item.path)}
-            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
-              isActive(item.path)
-                ? 'bg-medical-medium/10 text-medical-medium'
-                : 'text-gray-600 hover:bg-gray-100'
-            }`}
-          >
-            <item.icon className="w-5 h-5 flex-shrink-0" />
-            {(!collapsed || mobile) && <span>{item.label}</span>}
-          </button>
-        ))}
-      </nav>
-      {!mobile && (
-        <div className="p-2 border-t">
-          <button
-            onClick={() => setCollapsed(!collapsed)}
-            className="w-full flex items-center justify-center p-2 rounded-lg text-gray-500 hover:bg-gray-100"
-          >
-            {collapsed ? <ChevronRight className="w-5 h-5" /> : <ChevronLeft className="w-5 h-5" />}
-          </button>
-        </div>
-      )}
-    </div>
-  );
-
   return (
     <div className="flex h-screen bg-cream">
       {/* Desktop Sidebar */}
@@ -109,7 +122,12 @@ const DashboardLayout = ({ children, title }: DashboardLayoutProps) => {
           collapsed ? 'w-16' : 'w-64'
         }`}
       >
-        <SidebarContent />
+        <SidebarContent
+          collapsed={collapsed}
+          navigate={navigate}
+          isActive={isActive}
+          onToggleCollapse={() => setCollapsed(!collapsed)}
+        />
       </aside>
 
       {/* Main Content */}
@@ -125,7 +143,13 @@ const DashboardLayout = ({ children, title }: DashboardLayoutProps) => {
                 </Button>
               </SheetTrigger>
               <SheetContent side="left" className="w-64 p-0">
-                <SidebarContent mobile />
+                <SidebarContent
+                  mobile
+                  collapsed={collapsed}
+                  navigate={navigate}
+                  isActive={isActive}
+                  onToggleCollapse={() => setCollapsed(!collapsed)}
+                />
               </SheetContent>
             </Sheet>
             <h1 className="text-xl font-semibold text-gray-900">{title}</h1>

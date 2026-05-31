@@ -48,6 +48,38 @@ const CreateInvoice = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Validation
+    if (!patientId) {
+      toast({
+        title: 'Validation Error',
+        description: 'Please select a patient.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    const hasInvalidItem = items.some(
+      (item) => !item.name.trim() || item.quantity <= 0 || item.unitPrice <= 0
+    );
+    if (hasInvalidItem) {
+      toast({
+        title: 'Validation Error',
+        description: 'Each line item must have a name, positive quantity, and positive price.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    if (discount < 0) {
+      toast({
+        title: 'Validation Error',
+        description: 'Discount cannot be negative.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
     toast({
       title: 'Invoice Created',
       description: 'Invoice has been created successfully.',
