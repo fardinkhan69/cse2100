@@ -37,6 +37,15 @@ import PrivateRoute from "./components/PrivateRoute";
 import AdminRoute from "./components/AdminRoute";
 import DoctorRoute from "./components/DoctorRoute";
 import AuthDebugger from "./components/AuthDebugger";
+import AdminDashboard from "./pages/admin/AdminDashboard";
+import PatientList from "./pages/admin/PatientList";
+import PatientDetail from "./pages/admin/PatientDetail";
+import AppointmentsPage from "./pages/admin/AppointmentsPage";
+import BillingPage from "./pages/admin/BillingPage";
+import CreateInvoice from "./pages/admin/CreateInvoice";
+import StaffPage from "./pages/admin/StaffPage";
+import SettingsPage from "./pages/admin/SettingsPage";
+import NotificationsPage from "./pages/admin/NotificationsPage";
 
 // Create a new QueryClient instance for React Query
 // This handles caching, background updates, and error retries
@@ -106,6 +115,53 @@ const App = () => (
             <Route path="/book/:doctorId" element={
               <PrivateRoute>
                 <BookAppointment />
+              </PrivateRoute>
+            } />
+
+            {/* Admin/Clinic OS Routes */}
+            <Route path="/admin" element={
+              <PrivateRoute>
+                <AdminDashboard />
+              </PrivateRoute>
+            } />
+            <Route path="/admin/patients" element={
+              <PrivateRoute>
+                <PatientList />
+              </PrivateRoute>
+            } />
+            <Route path="/admin/patients/:patientId" element={
+              <PrivateRoute>
+                <PatientDetail />
+              </PrivateRoute>
+            } />
+            <Route path="/admin/appointments" element={
+              <PrivateRoute>
+                <AppointmentsPage />
+              </PrivateRoute>
+            } />
+            <Route path="/admin/billing" element={
+              <PrivateRoute>
+                <BillingPage />
+              </PrivateRoute>
+            } />
+            <Route path="/admin/billing/create" element={
+              <PrivateRoute>
+                <CreateInvoice />
+              </PrivateRoute>
+            } />
+            <Route path="/admin/staff" element={
+              <PrivateRoute>
+                <StaffPage />
+              </PrivateRoute>
+            } />
+            <Route path="/admin/settings" element={
+              <PrivateRoute>
+                <SettingsPage />
+              </PrivateRoute>
+            } />
+            <Route path="/admin/notifications" element={
+              <PrivateRoute>
+                <NotificationsPage />
               </PrivateRoute>
             } />
 
