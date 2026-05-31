@@ -42,7 +42,17 @@ const StaffPage = () => {
 
   const handleAddStaff = (e: React.FormEvent) => {
     e.preventDefault();
-    toast({ title: 'Staff Added', description: newStaff.name + ' has been added to the team.' });
+
+    if (!newStaff.role) {
+      toast({
+        title: 'Validation Error',
+        description: 'Please select a role.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    toast({ title: 'Staff Added', description: `${newStaff.name} has been added to the team.` });
     setDialogOpen(false);
     setNewStaff({ name: '', email: '', phone: '', role: '', specialization: '' });
   };
