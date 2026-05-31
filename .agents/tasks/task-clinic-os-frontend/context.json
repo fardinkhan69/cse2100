@@ -1,0 +1,32 @@
+{
+  "project_type": "React SPA with TypeScript - Doctor Appointment Booking System being upgraded to Clinic OS SaaS",
+  "language": "TypeScript / React",
+  "build_system": "Vite with npm - standard build, no special quirks",
+  "test_framework": "No test framework configured - validation via build only",
+  "build_command": "cd /projects/sandbox/cse2100 && npm run build",
+  "test_command": "cd /projects/sandbox/cse2100 && npm run build",
+  "verification_instructions": "Run npm run build to verify TypeScript compilation and Vite bundling succeeds with no errors",
+  "snapshot_or_generated_files": null,
+  "setup_instructions": "cd /projects/sandbox/cse2100 && npm install",
+  "environment_constraints": "OPEN_INTERNET network mode - full access. Node.js v22 available via nvm.",
+  "contribution_requirements": "No CONTRIBUTING.md found. Follow existing patterns: Shadcn UI components, Tailwind CSS, motion animations, React Query for data fetching, React Router for routing.",
+  "key_patterns": "- Pages in src/pages/ as default exports\n- Components in src/components/ using Shadcn UI from src/components/ui/\n- Services in src/services/ using axios with createSecureAxios pattern\n- Hooks in src/hooks/ (useAuth, useAdmin, useAxiosSecure, useAxiosPublic)\n- AuthContext provides user, isLoading, tokenReady, signOutUser\n- AdminRoute component guards admin pages\n- PrivateRoute component guards authenticated pages\n- motion/react for animations (not framer-motion)\n- date-fns for date utilities\n- recharts for charts\n- lucide-react for icons\n- Tailwind theme uses medical-light, medical-medium, medical-dark, cream custom colors\n- bg-cream for page backgrounds, Cards for content sections",
+  "relevant_files": [
+    "src/App.tsx",
+    "src/services/api.ts",
+    "src/components/AuthProvider.tsx",
+    "src/components/AdminRoute.tsx",
+    "src/components/PrivateRoute.tsx",
+    "src/hooks/useAuth.tsx",
+    "src/hooks/useAdmin.tsx",
+    "src/pages/DoctorDashboard.tsx",
+    "src/pages/Dashboard.tsx",
+    "src/pages/Index.tsx",
+    "src/data/doctors.ts",
+    "src/components/ui/card.tsx",
+    "src/components/ui/button.tsx",
+    "src/components/ui/tabs.tsx",
+    "src/components/ui/badge.tsx"
+  ],
+  "directory_structure": "src/\n  App.tsx - Root component with routing\n  pages/ - Page components (Index, Login, Dashboard, DoctorDashboard, etc)\n  components/ - Reusable components + ui/ (Shadcn)\n  services/ - API service files (api.ts, doctorApi.ts)\n  hooks/ - Custom hooks (useAuth, useAdmin, useAxiosSecure, etc)\n  data/ - Static data (doctors.ts)\n  firebase/ - Firebase config\n  images/ - Static images\n  utils/ - Utilities (pdfGenerator.ts)"
+}

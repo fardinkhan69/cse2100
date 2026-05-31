@@ -8,17 +8,17 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    --background: 210 40% 98%;
+    --foreground: 222.2 47% 11%;
 
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card-foreground: 222.2 47% 11%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover-foreground: 222.2 47% 11%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    --primary: 221 83% 53%;
+    --primary-foreground: 0 0% 100%;
 
     --secondary: 210 40% 96.1%;
     --secondary-foreground: 222.2 47.4% 11.2%;
@@ -26,71 +26,77 @@ All colors MUST be HSL.
     --muted: 210 40% 96.1%;
     --muted-foreground: 215.4 16.3% 46.9%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent: 199 89% 48%;
+    --accent-foreground: 0 0% 100%;
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
 
+    --success: 142 71% 45%;
+    --success-foreground: 0 0% 100%;
+
+    --warning: 38 92% 50%;
+    --warning-foreground: 0 0% 100%;
+
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --ring: 221 83% 53%;
 
-    --radius: 0.5rem;
+    --radius: 0.75rem;
 
-    --sidebar-background: 0 0% 98%;
-
-    --sidebar-foreground: 240 5.3% 26.1%;
-
-    --sidebar-primary: 240 5.9% 10%;
-
-    --sidebar-primary-foreground: 0 0% 98%;
-
-    --sidebar-accent: 240 4.8% 95.9%;
-
-    --sidebar-accent-foreground: 240 5.9% 10%;
-
-    --sidebar-border: 220 13% 91%;
-
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 222 30% 25%;
+    --sidebar-primary: 221 83% 53%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 210 40% 96%;
+    --sidebar-accent-foreground: 221 83% 53%;
+    --sidebar-border: 214.3 31.8% 91.4%;
+    --sidebar-ring: 221 83% 53%;
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
+    --background: 222 47% 7%;
     --foreground: 210 40% 98%;
 
-    --card: 222.2 84% 4.9%;
+    --card: 222 44% 10%;
     --card-foreground: 210 40% 98%;
 
-    --popover: 222.2 84% 4.9%;
+    --popover: 222 44% 10%;
     --popover-foreground: 210 40% 98%;
 
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
+    --primary: 217 91% 60%;
+    --primary-foreground: 222 47% 7%;
 
-    --secondary: 217.2 32.6% 17.5%;
+    --secondary: 217 33% 17%;
     --secondary-foreground: 210 40% 98%;
 
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
+    --muted: 217 33% 15%;
+    --muted-foreground: 215 20% 65%;
 
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
+    --accent: 199 89% 55%;
+    --accent-foreground: 222 47% 7%;
 
-    --destructive: 0 62.8% 30.6%;
+    --destructive: 0 72% 51%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --success: 142 71% 45%;
+    --success-foreground: 0 0% 100%;
+
+    --warning: 38 92% 50%;
+    --warning-foreground: 222 47% 7%;
+
+    --border: 217 33% 20%;
+    --input: 217 33% 20%;
+    --ring: 217 91% 60%;
+
+    --sidebar-background: 222 47% 9%;
+    --sidebar-foreground: 215 20% 75%;
+    --sidebar-primary: 217 91% 60%;
+    --sidebar-primary-foreground: 222 47% 7%;
+    --sidebar-accent: 217 33% 15%;
+    --sidebar-accent-foreground: 210 40% 98%;
+    --sidebar-border: 217 33% 18%;
+    --sidebar-ring: 217 91% 60%;
   }
 }
 
@@ -101,6 +107,7 @@ All colors MUST be HSL.
 
   body {
     @apply bg-background text-foreground;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
   }
 }
 
@@ -134,47 +141,90 @@ All colors MUST be HSL.
   animation: spin-around calc(var(--speed) * 2) infinite linear;
 }
 
+/* ===== Clinic OS Modern Design Utilities ===== */
+@layer utilities {
+  /* Brand gradient text */
+  .text-gradient {
+    @apply bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent;
+  }
+
+  /* Glassmorphism surface */
+  .glass {
+    @apply bg-card/70 backdrop-blur-xl border border-border/60;
+  }
+
+  /* Soft elevated card */
+  .card-elevated {
+    @apply bg-card border border-border/60 shadow-[0_1px_3px_rgba(0,0,0,0.04),0_8px_24px_-12px_rgba(0,0,0,0.12)];
+  }
+
+  /* Hover lift interaction */
+  .hover-lift {
+    @apply transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_12px_32px_-12px_rgba(0,0,0,0.25)];
+  }
+
+  /* Gradient brand surfaces */
+  .gradient-brand {
+    background-image: linear-gradient(135deg, hsl(221 83% 53%), hsl(199 89% 48%));
+  }
+  .gradient-violet {
+    background-image: linear-gradient(135deg, hsl(262 83% 58%), hsl(221 83% 53%));
+  }
+  .gradient-emerald {
+    background-image: linear-gradient(135deg, hsl(160 84% 39%), hsl(142 71% 45%));
+  }
+  .gradient-amber {
+    background-image: linear-gradient(135deg, hsl(25 95% 53%), hsl(38 92% 50%));
+  }
+  .gradient-rose {
+    background-image: linear-gradient(135deg, hsl(340 82% 52%), hsl(0 84% 60%));
+  }
+}
+
+/* Custom scrollbar */
+@layer base {
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: hsl(var(--muted-foreground) / 0.3);
+    border-radius: 9999px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--muted-foreground) / 0.5);
+  }
+}
+
 /* Mobile-First Responsive Utilities */
 @layer utilities {
-  /* Touch-friendly minimum sizes for mobile */
   .touch-target {
     min-height: 44px;
     min-width: 44px;
   }
-
-  /* Mobile-optimized text sizes */
   .text-mobile-xs { font-size: 0.75rem; line-height: 1rem; }
   .text-mobile-sm { font-size: 0.875rem; line-height: 1.25rem; }
   .text-mobile-base { font-size: 1rem; line-height: 1.5rem; }
   .text-mobile-lg { font-size: 1.125rem; line-height: 1.75rem; }
-
-  /* Mobile-specific spacing */
   .mobile-padding { padding: 0.75rem; }
   .mobile-margin { margin: 0.5rem; }
-
-  /* Responsive grid utilities */
   .grid-mobile-1 { grid-template-columns: repeat(1, minmax(0, 1fr)); }
   .grid-mobile-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-
-  /* Mobile-friendly card spacing */
   .card-mobile {
     padding: 0.75rem;
     margin-bottom: 0.75rem;
   }
-
-  /* Responsive button heights */
   .btn-mobile { height: 2.5rem; }
   .btn-tablet { height: 2.75rem; }
   .btn-desktop { height: 3rem; }
-
-  /* Mobile-optimized form inputs */
   .input-mobile {
     height: 2.5rem;
     font-size: 1rem;
     padding: 0.5rem 0.75rem;
   }
-
-  /* Responsive text truncation */
   .truncate-mobile {
     overflow: hidden;
     text-overflow: ellipsis;

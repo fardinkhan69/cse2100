@@ -21,6 +21,20 @@ import AuthProvider from "./components/AuthProvider";
 import PrivateRoute from "./components/PrivateRoute";
 import AdminRoute from "./components/AdminRoute";
 import DoctorRoute from "./components/DoctorRoute";
+import AuthDebugger from "./components/AuthDebugger";
+import { NotificationProvider } from "./contexts/NotificationContext";
+import { ThemeProvider } from "./contexts/ThemeContext";
+import AdminDashboard from "./pages/admin/AdminDashboard";
+import PatientList from "./pages/admin/PatientList";
+import PatientDetail from "./pages/admin/PatientDetail";
+import AppointmentsPage from "./pages/admin/AppointmentsPage";
+import BillingPage from "./pages/admin/BillingPage";
+import CreateInvoice from "./pages/admin/CreateInvoice";
+import StaffPage from "./pages/admin/StaffPage";
+import SettingsPage from "./pages/admin/SettingsPage";
+import NotificationsPage from "./pages/admin/NotificationsPage";
+import AnalyticsPage from "./pages/admin/AnalyticsPage";
+import PharmacyPage from "./pages/admin/PharmacyPage";
 
 // Create a new QueryClient instance for React Query
 const queryClient = new QueryClient({
@@ -42,7 +56,10 @@ const App = () => (
 
       <BrowserRouter>
         <AuthProvider>
-          <Routes>
+          <ThemeProvider>
+            <NotificationProvider>
+              <AuthDebugger />
+              <Routes>
             {/* Home page route */}
             <Route path="/" element={<Index />} />
 
@@ -79,9 +96,68 @@ const App = () => (
               </PrivateRoute>
             } />
 
+            {/* Admin/Clinic OS Routes */}
+            <Route path="/admin" element={
+              <AdminRoute>
+                <AdminDashboard />
+              </AdminRoute>
+            } />
+            <Route path="/admin/patients" element={
+              <AdminRoute>
+                <PatientList />
+              </AdminRoute>
+            } />
+            <Route path="/admin/patients/:patientId" element={
+              <AdminRoute>
+                <PatientDetail />
+              </AdminRoute>
+            } />
+            <Route path="/admin/appointments" element={
+              <AdminRoute>
+                <AppointmentsPage />
+              </AdminRoute>
+            } />
+            <Route path="/admin/billing" element={
+              <AdminRoute>
+                <BillingPage />
+              </AdminRoute>
+            } />
+            <Route path="/admin/billing/create" element={
+              <AdminRoute>
+                <CreateInvoice />
+              </AdminRoute>
+            } />
+            <Route path="/admin/staff" element={
+              <AdminRoute>
+                <StaffPage />
+              </AdminRoute>
+            } />
+            <Route path="/admin/analytics" element={
+              <AdminRoute>
+                <AnalyticsPage />
+              </AdminRoute>
+            } />
+            <Route path="/admin/pharmacy" element={
+              <AdminRoute>
+                <PharmacyPage />
+              </AdminRoute>
+            } />
+            <Route path="/admin/settings" element={
+              <AdminRoute>
+                <SettingsPage />
+              </AdminRoute>
+            } />
+            <Route path="/admin/notifications" element={
+              <AdminRoute>
+                <NotificationsPage />
+              </AdminRoute>
+            } />
+
             {/* Catch-all route for 404 errors */}
             <Route path="*" element={<NotFound />} />
-          </Routes>
+              </Routes>
+            </NotificationProvider>
+          </ThemeProvider>
         </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>
